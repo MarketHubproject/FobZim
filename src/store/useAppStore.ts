@@ -14,9 +14,15 @@ interface AppState {
   savedCampaignIds: string[];
   savedTrendIds: string[];
   appliedCampaignIds: string[];
+  savedTips: string[];
+  
+  // Search state
+  searchQuery: string;
+  searchHistory: string[];
   
   // UI state
   isHydrated: boolean;
+  showOnboardingTip: boolean;
 }
 
 interface AppActions {
@@ -32,6 +38,16 @@ interface AppActions {
   toggleSaveCampaign: (campaignId: string) => void;
   toggleSaveTrend: (trendId: string) => void;
   markCampaignApplied: (campaignId: string) => void;
+  saveTip: (tip: string) => void;
+  removeSavedTip: (tip: string) => void;
+  
+  // Search actions
+  setSearchQuery: (query: string) => void;
+  addToSearchHistory: (query: string) => void;
+  clearSearchHistory: () => void;
+  
+  // UI actions
+  dismissOnboardingTip: () => void;
   
   // Utility actions
   clearAllData: () => void;
@@ -54,7 +70,11 @@ const initialState: AppState = {
   savedCampaignIds: [],
   savedTrendIds: [],
   appliedCampaignIds: [],
+  savedTips: [],
+  searchQuery: '',
+  searchHistory: [],
   isHydrated: false,
+  showOnboardingTip: true,
 };
 
 export const useAppStore = create<AppStore>()(
@@ -124,6 +144,40 @@ export const useAppStore = create<AppStore>()(
             : [...state.appliedCampaignIds, campaignId],
         }));
       },
+
+      saveTip: (tip) => {
+        set((state) => ({
+          savedTips: state.savedTips.includes(tip)
+            ? state.savedTips
+            : [...state.savedTips, tip],
+        }));
+      },
+
+      removeSavedTip: (tip) => {
+        set((state) => ({
+          savedTips: state.savedTips.filter((t) => t !== tip),
+        }));
+      },
+
+      // Search actions
+      setSearchQuery: (query) => {
+        set({ searchQuery: query });
+      },
+
+      addToSearchHistory: (query) => {
+        set((state) => ({
+          searchHistory: [query, ...state.searchHistory.filter((q) => q !== query)].slice(0, 10),
+        }));
+      },
+
+      clearSearchHistory: () => {
+        set({ searchHistory: [] });
+      },
+
+      // UI actions
+      dismissOnboardingTip: () => {
+        set({ showOnboardingTip: false });
+      },
       
       // Utility actions
       clearAllData: () => {
@@ -150,6 +204,9 @@ export const useAppStore = create<AppStore>()(
         savedCampaignIds: state.savedCampaignIds,
         savedTrendIds: state.savedTrendIds,
         appliedCampaignIds: state.appliedCampaignIds,
+        savedTips: state.savedTips,
+        searchHistory: state.searchHistory,
+        showOnboardingTip: state.showOnboardingTip,
       }),
     }
   )

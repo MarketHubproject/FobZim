@@ -6,16 +6,17 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Trend } from '../data/types';
 import { colors } from '../theme/colors';
 import { spacing, radius, shadow } from '../theme/tokens';
+import { useAppStore } from '../store/useAppStore';
 
 interface TrendItemProps {
   trend: Trend;
-  saved?: boolean;
   onPress?: () => void;
-  onSave?: () => void;
   compact?: boolean;
 }
 
-export default function TrendItem({ trend, saved = false, onPress, onSave, compact = false }: TrendItemProps) {
+export default function TrendItem({ trend, onPress, compact = false }: TrendItemProps) {
+  const { toggleSaveTrend, savedTrendIds } = useAppStore();
+  const saved = savedTrendIds.includes(trend.id);
   const formatPostsCount = (count: number): string => {
     if (count >= 1000000) {
       return `${(count / 1000000).toFixed(1)}M`;
@@ -128,7 +129,7 @@ export default function TrendItem({ trend, saved = false, onPress, onSave, compa
               icon={saved ? 'bookmark' : 'bookmark-outline'}
               iconColor={saved ? colors.secondary : colors.textSecondary}
               size={24}
-              onPress={onSave}
+              onPress={() => toggleSaveTrend(trend.id)}
               style={styles.saveButton}
             />
           </View>

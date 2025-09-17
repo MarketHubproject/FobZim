@@ -13,10 +13,25 @@ import LoadingOverlay from '../../components/LoadingOverlay';
 
 import { mockCreators, mockPosts, mockCampaigns, dailyTips } from '../../data/mockData';
 import { Creator, Post, Campaign } from '../../data/types';
+import { useAppStore } from '../../store/useAppStore';
 
 export default function HomeScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState('');
+  
+  // Store actions
+  const { 
+    saveTip, 
+    removeSavedTip, 
+    markCampaignApplied,
+    toggleSaveCampaign,
+    savedTips,
+    savedCampaignIds,
+    appliedCampaignIds,
+    showOnboardingTip,
+    dismissOnboardingTip
+  } = useAppStore();
   
   // Get data for home screen
   const spotlightCreators = mockCreators.filter(creator => creator.spotlight).slice(0, 5);
@@ -30,6 +45,36 @@ export default function HomeScreen() {
     setTimeout(() => {
       setRefreshing(false);
     }, 1500);
+  };
+
+  const handleSaveTip = (tip: string) => {
+    const isSaved = savedTips.includes(tip);
+    if (isSaved) {
+      removeSavedTip(tip);
+      setShowSuccessMessage('Tip removed from saved items');
+    } else {
+      saveTip(tip);
+      setShowSuccessMessage('Tip saved! Check your Profile to see all saved tips.');
+    }
+    setTimeout(() => setShowSuccessMessage(''), 3000);
+  };
+
+  const handleApplyToCampaign = (campaign: Campaign) => {
+    const isAlreadyApplied = appliedCampaignIds.includes(campaign.id);
+    if (isAlreadyApplied) {
+      setShowSuccessMessage('You have already applied to this campaign!');
+    } else {
+      markCampaignApplied(campaign.id);
+      setShowSuccessMessage(`Applied to ${campaign.brand} campaign! They'll review your application.`);
+    }
+    setTimeout(() => setShowSuccessMessage(''), 4000);
+  };
+
+  const handleSaveCampaign = (campaignId: string) => {
+    toggleSaveCampaign(campaignId);
+    const isSaved = savedCampaignIds.includes(campaignId);
+    setShowSuccessMessage(isSaved ? 'Campaign removed from saved' : 'Campaign saved!');
+    setTimeout(() => setShowSuccessMessage(''), 2000);
   };
 
   const renderCreator = ({ item }: { item: Creator }) => (
@@ -87,8 +132,35 @@ export default function HomeScreen() {
             <Text variant="bodyMedium" style={styles.tipText}>
               {todaysTip}
             </Text>
+            <View style={styles.tipActions}>
+              <Button
+                mode={savedTips.includes(todaysTip) ? 'contained' : 'outlined'}
+                onPress={() => handleSaveTip(todaysTip)}
+                style={styles.saveTipButton}
+                icon={savedTips.includes(todaysTip) ? 'bookmark' : 'bookmark-outline'}
+                labelStyle={styles.saveTipLabel}
+              >
+                {savedTips.includes(todaysTip) ? 'Saved' : 'Save Tip'}
+              </Button>
+            </View>
           </View>
         </Card>
+
+        {/* Success Message */}
+        {showSuccessMessage && (
+          <Card style={styles.successCard} elevation={3}>
+            <View style={styles.successContent}>
+              <MaterialCommunityIcons 
+                name="check-circle" 
+                size={20} 
+                color={colors.success} 
+              />
+              <Text variant="bodyMedium" style={styles.successText}>
+                {showSuccessMessage}
+              </Text>
+            </View>
+          </Card>
+        )}
 
         {/* Spotlight Creators */}
         <SectionHeader 
@@ -130,43 +202,63 @@ export default function HomeScreen() {
           onActionPress={() => console.log('View campaigns')}
         />
         
-        {topCampaigns.map((campaign) => (
-          <Card key={campaign.id} style={styles.campaignCard} elevation={2}>
-            <View style={styles.campaignContent}>
-              <View style={styles.campaignInfo}>
-                <Text variant="titleMedium" style={styles.campaignTitle}>
-                  {campaign.brand}
-                </Text>
-                <Text variant="bodyMedium" style={styles.campaignDescription}>
-                  {campaign.title}
-                </Text>
-                <View style={styles.campaignMeta}>
-                  <View style={styles.budgetContainer}>
-                    <MaterialCommunityIcons 
-                      name="currency-usd" 
-                      size={16} 
-                      color={colors.success} 
-                    />
-                    <Text variant="bodySmall" style={styles.budgetText}>
-                      ${campaign.budgetUSD}
+        {topCampaigns.map((campaign) => {
+          const isApplied = appliedCampaignIds.includes(campaign.id);
+          const isSaved = savedCampaignIds.includes(campaign.id);
+          
+          return (
+            <Card key={campaign.id} style={styles.campaignCard} elevation={2}>
+              <View style={styles.campaignContent}>
+                <View style={styles.campaignInfo}>
+                  <View style={styles.campaignHeader}>
+                    <Text variant="titleMedium" style={styles.campaignTitle}>
+                      {campaign.brand}
+                    </Text>
+                    <Button
+                      mode="text"
+                      onPress={() => handleSaveCampaign(campaign.id)}
+                      style={styles.saveButton}
+                      labelStyle={styles.saveButtonLabel}
+                      icon={isSaved ? 'bookmark' : 'bookmark-outline'}
+                    >
+                      {isSaved ? 'Saved' : 'Save'}
+                    </Button>
+                  </View>
+                  <Text variant="bodyMedium" style={styles.campaignDescription}>
+                    {campaign.title}
+                  </Text>
+                  <View style={styles.campaignMeta}>
+                    <View style={styles.budgetContainer}>
+                      <MaterialCommunityIcons 
+                        name="currency-usd" 
+                        size={16} 
+                        color={colors.success} 
+                      />
+                      <Text variant="bodySmall" style={styles.budgetText}>
+                        ${campaign.budgetUSD}
+                      </Text>
+                    </View>
+                    <Text variant="bodySmall" style={styles.deadlineText}>
+                      Deadline: {new Date(campaign.deadlineISO).toLocaleDateString()}
                     </Text>
                   </View>
-                  <Text variant="bodySmall" style={styles.deadlineText}>
-                    Deadline: {new Date(campaign.deadlineISO).toLocaleDateString()}
-                  </Text>
+                </View>
+                <View style={styles.campaignActions}>
+                  <Button 
+                    mode={isApplied ? "outlined" : "contained"}
+                    style={[styles.applyButton, isApplied && styles.appliedButton]}
+                    labelStyle={[styles.applyButtonText, isApplied && styles.appliedButtonText]}
+                    onPress={() => handleApplyToCampaign(campaign)}
+                    disabled={isApplied}
+                    icon={isApplied ? 'check' : 'send'}
+                  >
+                    {isApplied ? 'Applied' : 'Apply'}
+                  </Button>
                 </View>
               </View>
-              <Button 
-                mode="contained" 
-                style={styles.applyButton}
-                labelStyle={styles.applyButtonText}
-                onPress={() => console.log('Apply to:', campaign.brand)}
-              >
-                Apply
-              </Button>
-            </View>
-          </Card>
-        ))}
+            </Card>
+          );
+        })}
 
         {/* Bottom spacing */}
         <View style={styles.bottomSpacing} />
@@ -279,5 +371,56 @@ const styles = StyleSheet.create({
   },
   bottomSpacing: {
     height: spacing.xl,
+  },
+  tipActions: {
+    marginTop: spacing.md,
+    alignItems: 'flex-start',
+  },
+  saveTipButton: {
+    borderColor: colors.primary,
+  },
+  saveTipLabel: {
+    fontSize: 14,
+  },
+  successCard: {
+    backgroundColor: colors.success + '15',
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.md,
+    borderRadius: radius.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.success,
+  },
+  successContent: {
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  successText: {
+    color: colors.success,
+    marginLeft: spacing.sm,
+    fontWeight: '500',
+    flex: 1,
+  },
+  campaignHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: spacing.xs,
+  },
+  saveButton: {
+    marginRight: -spacing.sm,
+  },
+  saveButtonLabel: {
+    fontSize: 12,
+  },
+  campaignActions: {
+    justifyContent: 'center',
+  },
+  appliedButton: {
+    borderColor: colors.success,
+    backgroundColor: 'transparent',
+  },
+  appliedButtonText: {
+    color: colors.success,
   },
 });
