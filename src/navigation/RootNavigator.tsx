@@ -70,7 +70,7 @@ export default function RootNavigator() {
       <Tab.Screen 
         name="Home" 
         component={HomeScreen}
-        options={{ title: 'ZimBuzz' }}
+        options={{ title: 'FobZim' }}
       />
       <Tab.Screen 
         name="Creators" 

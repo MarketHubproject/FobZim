@@ -15,7 +15,7 @@ function LoadingScreen() {
   return (
     <View style={styles.loadingContainer}>
       <ActivityIndicator size="large" color={colors.primary} />
-      <Text style={styles.loadingText}>Loading ZimBuzz...</Text>
+      <Text style={styles.loadingText}>Loading FobZim...</Text>
     </View>
   );
 }

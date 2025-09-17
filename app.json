@@ -1,10 +1,10 @@
 {
   "expo": {
-    "name": "ZimBuzz",
-    "slug": "zimbuzz",
+    "name": "FobZim",
+    "slug": "fobzim",
     "version": "1.0.0",
-    "scheme": "zimbuzz",
-    "description": "ZimBuzz connects Zimbabwean creators and brands with trends and campaigns.",
+    "scheme": "fobzim",
+    "description": "FobZim connects Zimbabwean creators and brands with trends and campaigns.",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",

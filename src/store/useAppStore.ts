@@ -138,10 +138,10 @@ export const useAppStore = create<AppStore>()(
       },
     }),
     {
-      name: 'zimbuzz-storage',
+      name: 'fobzim-storage',
       storage: createJSONStorage(() => AsyncStorage),
       onRehydrateStorage: () => (state) => {
-        console.log('ZimBuzz store rehydrated');
+        console.log('FobZim store rehydrated');
         state?.setHydrated(true);
       },
       partialize: (state) => ({

@@ -9,7 +9,7 @@ export default function HomeScreen() {
     <ScrollView style={styles.container}>
       <View style={styles.content}>
         <Text variant="headlineMedium" style={styles.greeting}>
-          Welcome to ZimBuzz! 🇿🇼
+          Welcome to FobZim! 🇿🇼
         </Text>
         <Text variant="bodyLarge" style={styles.subtitle}>
           Connecting Zimbabwean creators and brands

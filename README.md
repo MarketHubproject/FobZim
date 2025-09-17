@@ -1,6 +1,6 @@
-# ZimBuzz 🇿🇼
+# FobZim 🇿🇼
 
-**ZimBuzz connects Zimbabwean creators and brands with trends and campaigns.**
+**FobZim connects Zimbabwean creators and brands with trends and campaigns.**
 
 A mobile app platform designed to empower Zimbabwe's content creator economy by connecting creators with brand opportunities, trending topics, and community insights.
 
@@ -39,7 +39,7 @@ A mobile app platform designed to empower Zimbabwe's content creator economy by 
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd ZimBuzz
+   cd FobZim
    ```
 
 2. **Install dependencies**
@@ -63,7 +63,7 @@ A mobile app platform designed to empower Zimbabwe's content creator economy by 
 ## 📁 Project Structure
 
 ```
-ZimBuzz/
+FobZim/
 ├── src/
 │   ├── components/          # Reusable UI components
 │   ├── screens/            # Screen components
@@ -219,7 +219,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Project Lead**: [Your Name]
 - **Email**: [your.email@example.com]
-- **GitHub**: [github.com/yourusername/ZimBuzz]
+- **GitHub**: [github.com/yourusername/FobZim]
 
 ---
 
