@@ -6,7 +6,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Trend } from '../data/types';
 import { colors } from '../theme/colors';
 import { spacing, radius, shadow } from '../theme/tokens';
-import { useAppStore } from '../store/useAppStore';
+import { useAppStore } from '../store/simpleStore';
 
 interface TrendItemProps {
   trend: Trend;
@@ -15,7 +15,7 @@ interface TrendItemProps {
 }
 
 export default function TrendItem({ trend, onPress, compact = false }: TrendItemProps) {
-  const { toggleSaveTrend, savedTrendIds } = useAppStore();
+  const { savedTrendIds, toggleSaveTrend } = useAppStore();
   const saved = savedTrendIds.includes(trend.id);
   const formatPostsCount = (count: number): string => {
     if (count >= 1000000) {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, Card, Chip, Avatar } from 'react-native-paper';
+import { Text, Card, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 
@@ -48,7 +48,7 @@ export default function CreatorCard({ creator, onPress, compact = false }: Creat
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Card style={[styles.card, compact && styles.compactCard]} elevation={2}>
+      <Card style={[styles.card, compact && styles.compactCard]} elevation={3}>
         <View style={styles.cardContent}>
           {/* Avatar and Spotlight Badge */}
           <View style={styles.avatarContainer}>

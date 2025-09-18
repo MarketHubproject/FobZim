@@ -1,7 +1,62 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Niche, UserProfile, AppPreferences } from '../data/types';
+
+// Cross-platform storage implementation
+const createStorage = () => {
+  // Check if we're in a web environment
+  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    // Web environment - use localStorage with proper error handling
+    return {
+      getItem: async (name: string): Promise<string | null> => {
+        try {
+          const value = localStorage.getItem(name);
+          return value;
+        } catch (error) {
+          console.warn('Failed to get item from localStorage:', error);
+          return null;
+        }
+      },
+      setItem: async (name: string, value: string): Promise<void> => {
+        try {
+          localStorage.setItem(name, value);
+        } catch (error) {
+          console.warn('Failed to set item in localStorage:', error);
+        }
+      },
+      removeItem: async (name: string): Promise<void> => {
+        try {
+          localStorage.removeItem(name);
+        } catch (error) {
+          console.warn('Failed to remove item from localStorage:', error);
+        }
+      },
+    };
+  } else {
+    // React Native environment - use AsyncStorage
+    try {
+      const AsyncStorage = require('@react-native-async-storage/async-storage').default;
+      return AsyncStorage;
+    } catch (error) {
+      console.warn('AsyncStorage not available, using memory storage');
+      // Fallback to memory storage
+      const memoryStorage: { [key: string]: string } = {};
+      return {
+        getItem: async (name: string): Promise<string | null> => {
+          return memoryStorage[name] || null;
+        },
+        setItem: async (name: string, value: string): Promise<void> => {
+          memoryStorage[name] = value;
+        },
+        removeItem: async (name: string): Promise<void> => {
+          delete memoryStorage[name];
+        },
+      };
+    }
+  }
+};
+
+const storage = createStorage();
 
 interface AppState {
   // User profile
@@ -73,14 +128,12 @@ const initialState: AppState = {
   savedTips: [],
   searchQuery: '',
   searchHistory: [],
-  isHydrated: false,
+  isHydrated: true,
   showOnboardingTip: true,
 };
 
-export const useAppStore = create<AppStore>()(
-  persist(
-    (set, get) => ({
-      ...initialState,
+export const useAppStore = create<AppStore>()((set, get) => ({
+  ...initialState,
       
       // Profile actions
       updateProfile: (profileUpdate) => {
@@ -187,30 +240,10 @@ export const useAppStore = create<AppStore>()(
         }));
       },
       
-      setHydrated: (hydrated) => {
-        set({ isHydrated: hydrated });
-      },
-    }),
-    {
-      name: 'fobzim-storage',
-      storage: createJSONStorage(() => AsyncStorage),
-      onRehydrateStorage: () => (state) => {
-        console.log('FobZim store rehydrated');
-        state?.setHydrated(true);
-      },
-      partialize: (state) => ({
-        profile: state.profile,
-        preferences: state.preferences,
-        savedCampaignIds: state.savedCampaignIds,
-        savedTrendIds: state.savedTrendIds,
-        appliedCampaignIds: state.appliedCampaignIds,
-        savedTips: state.savedTips,
-        searchHistory: state.searchHistory,
-        showOnboardingTip: state.showOnboardingTip,
-      }),
-    }
-  )
-);
+  setHydrated: (hydrated) => {
+    set({ isHydrated: hydrated });
+  },
+}));
 
 // Selectors for commonly used derived state
 export const useProfile = () => useAppStore((state) => state.profile);

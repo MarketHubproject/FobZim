@@ -4,7 +4,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 
 // Import screens (we'll create these later)
-import HomeScreen from '../screens/Home/HomeScreen';
+import SimpleHomeScreen from '../screens/Home/SimpleHomeScreen';
 import CreatorsScreen from '../screens/Creators/CreatorsScreen';
 import TrendsScreen from '../screens/Trends/TrendsScreen';
 import ProfileScreen from '../screens/Profile/ProfileScreen';
@@ -69,7 +69,7 @@ export default function RootNavigator() {
     >
       <Tab.Screen 
         name="Home" 
-        component={HomeScreen}
+        component={SimpleHomeScreen}
         options={{ title: 'FobZim' }}
       />
       <Tab.Screen 

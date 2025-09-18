@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, ScrollView, StyleSheet, FlatList, RefreshControl } from 'react-native';
-import { Text, Button, Card } from 'react-native-paper';
+import { Text, Card, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { colors } from '../../theme/colors';
@@ -13,25 +13,29 @@ import LoadingOverlay from '../../components/LoadingOverlay';
 
 import { mockCreators, mockPosts, mockCampaigns, dailyTips } from '../../data/mockData';
 import { Creator, Post, Campaign } from '../../data/types';
-import { useAppStore } from '../../store/useAppStore';
+import { useAppStore } from '../../store/simpleStore';
 
 export default function HomeScreen() {
-  const [refreshing, setRefreshing] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState('');
-  
-  // Store actions
   const { 
+    savedTips, 
+    savedCampaignIds, 
+    appliedCampaignIds, 
     saveTip, 
     removeSavedTip, 
+    toggleSaveCampaign, 
     markCampaignApplied,
-    toggleSaveCampaign,
-    savedTips,
-    savedCampaignIds,
-    appliedCampaignIds,
-    showOnboardingTip,
-    dismissOnboardingTip
+    saveToStorage,
+    loadFromStorage,
+    clearStorage,
+    enableAutoSave,
+    disableAutoSave,
+    autoSaveEnabled
   } = useAppStore();
+  
+  const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
   
   // Get data for home screen
   const spotlightCreators = mockCreators.filter(creator => creator.spotlight).slice(0, 5);
@@ -48,40 +52,77 @@ export default function HomeScreen() {
   };
 
   const handleSaveTip = (tip: string) => {
-    const isSaved = savedTips.includes(tip);
-    if (isSaved) {
+    if (savedTips.includes(tip)) {
       removeSavedTip(tip);
-      setShowSuccessMessage('Tip removed from saved items');
+      showSuccessToast('💡 Tip removed from saved!');
     } else {
       saveTip(tip);
-      setShowSuccessMessage('Tip saved! Check your Profile to see all saved tips.');
+      showSuccessToast('💡 Tip saved to your collection!');
     }
-    setTimeout(() => setShowSuccessMessage(''), 3000);
   };
 
   const handleApplyToCampaign = (campaign: Campaign) => {
-    const isAlreadyApplied = appliedCampaignIds.includes(campaign.id);
-    if (isAlreadyApplied) {
-      setShowSuccessMessage('You have already applied to this campaign!');
-    } else {
-      markCampaignApplied(campaign.id);
-      setShowSuccessMessage(`Applied to ${campaign.brand} campaign! They'll review your application.`);
-    }
-    setTimeout(() => setShowSuccessMessage(''), 4000);
+    markCampaignApplied(campaign.id);
+    showSuccessToast(`🚀 Applied to ${campaign.brand} campaign!`);
   };
 
   const handleSaveCampaign = (campaignId: string) => {
+    const wasSaved = savedCampaignIds.includes(campaignId);
     toggleSaveCampaign(campaignId);
-    const isSaved = savedCampaignIds.includes(campaignId);
-    setShowSuccessMessage(isSaved ? 'Campaign removed from saved' : 'Campaign saved!');
-    setTimeout(() => setShowSuccessMessage(''), 2000);
+    showSuccessToast(wasSaved ? '📌 Campaign removed!' : '📌 Campaign saved!');
+  };
+
+  const showSuccessToast = (message: string) => {
+    setSuccessMessage(message);
+    setShowSuccess(true);
+    // Auto-dismiss after 3 seconds
+    setTimeout(() => {
+      setShowSuccess(false);
+      setSuccessMessage('');
+    }, 3000);
+  };
+
+  const dismissSuccess = () => {
+    setShowSuccess(false);
+    setSuccessMessage('');
+  };
+
+  const handleSaveToStorage = async () => {
+    setLoading(true);
+    const success = await saveToStorage();
+    setLoading(false);
+    showSuccessToast(success ? '💾 Data saved to storage!' : '❌ Failed to save data');
+  };
+
+  const handleLoadFromStorage = async () => {
+    setLoading(true);
+    await loadFromStorage();
+    setLoading(false);
+    showSuccessToast('🔄 Data loaded from storage!');
+  };
+
+  const handleClearStorage = async () => {
+    setLoading(true);
+    const success = await clearStorage();
+    setLoading(false);
+    showSuccessToast(success ? '🗑️ Storage cleared!' : '❌ Failed to clear storage');
+  };
+
+  const handleToggleAutoSave = () => {
+    if (autoSaveEnabled) {
+      disableAutoSave();
+      showSuccessToast('⏸️ Auto-save disabled');
+    } else {
+      enableAutoSave();
+      showSuccessToast('▶️ Auto-save enabled');
+    }
   };
 
   const renderCreator = ({ item }: { item: Creator }) => (
     <CreatorCard 
       creator={item} 
       compact
-      onPress={() => console.log('Creator pressed:', item.name)}
+      onPress={() => {}}
     />
   );
 
@@ -89,7 +130,7 @@ export default function HomeScreen() {
     <PostPreview 
       post={item} 
       compact
-      onPress={() => console.log('Post pressed:', item.id)}
+      onPress={() => {}}
     />
   );
 
@@ -116,6 +157,60 @@ export default function HomeScreen() {
           </Text>
         </View>
 
+        {/* Persistence Testing (Development only) */}
+        <Card style={styles.testCard} elevation={2}>
+          <View style={styles.testContent}>
+            <Text variant="titleMedium" style={styles.testTitle}>
+              🔧 Persistence Testing
+            </Text>
+            <Text variant="bodySmall" style={styles.testSubtitle}>
+              Test data saving/loading (Development mode)
+            </Text>
+            <View style={styles.autoSaveContainer}>
+              <Button
+                mode={autoSaveEnabled ? 'contained' : 'outlined'}
+                onPress={handleToggleAutoSave}
+                style={[styles.autoSaveButton, autoSaveEnabled && styles.autoSaveEnabled]}
+                icon={autoSaveEnabled ? 'pause' : 'play'}
+              >
+                {autoSaveEnabled ? 'Auto-Save ON' : 'Auto-Save OFF'}
+              </Button>
+            </View>
+            <View style={styles.testButtons}>
+              <Button
+                mode="outlined"
+                onPress={handleSaveToStorage}
+                style={styles.testButton}
+                icon="content-save"
+              >
+                Save Data
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={handleLoadFromStorage}
+                style={styles.testButton}
+                icon="reload"
+              >
+                Load Data
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={handleClearStorage}
+                style={styles.testButton}
+                icon="delete"
+              >
+                Clear Storage
+              </Button>
+            </View>
+            <Text variant="bodySmall" style={styles.testInfo}>
+              💡 Saved Tips: {savedTips.length} | Campaigns: {savedCampaignIds.length}
+            </Text>
+            <Text variant="bodySmall" style={[styles.testInfo, styles.autoSaveStatus]}>
+              🤖 Auto-Save: {autoSaveEnabled ? '✅ ENABLED' : '❌ DISABLED'}
+            </Text>
+          </View>
+        </Card>
+
         {/* Daily Tip */}
         <Card style={styles.tipCard} elevation={2}>
           <View style={styles.tipContent}>
@@ -140,14 +235,14 @@ export default function HomeScreen() {
                 icon={savedTips.includes(todaysTip) ? 'bookmark' : 'bookmark-outline'}
                 labelStyle={styles.saveTipLabel}
               >
-                {savedTips.includes(todaysTip) ? 'Saved' : 'Save Tip'}
+                {savedTips.includes(todaysTip) ? 'Saved ✓' : 'Save Tip'}
               </Button>
             </View>
           </View>
         </Card>
 
         {/* Success Message */}
-        {showSuccessMessage && (
+        {showSuccess && (
           <Card style={styles.successCard} elevation={3}>
             <View style={styles.successContent}>
               <MaterialCommunityIcons 
@@ -156,7 +251,7 @@ export default function HomeScreen() {
                 color={colors.success} 
               />
               <Text variant="bodyMedium" style={styles.successText}>
-                {showSuccessMessage}
+                {successMessage}
               </Text>
             </View>
           </Card>
@@ -167,7 +262,7 @@ export default function HomeScreen() {
           title="Spotlight Creators" 
           subtitle="Rising stars from Zimbabwe"
           actionText="See All"
-          onActionPress={() => console.log('See all creators')}
+          onActionPress={() => {}}
         />
         <FlatList
           data={spotlightCreators}
@@ -183,7 +278,7 @@ export default function HomeScreen() {
           title="Latest Content" 
           subtitle="Fresh posts from creators"
           actionText="Explore"
-          onActionPress={() => console.log('Explore content')}
+          onActionPress={() => {}}
         />
         <FlatList
           data={recentPosts}
@@ -199,7 +294,7 @@ export default function HomeScreen() {
           title="Brand Opportunities" 
           subtitle="Featured campaigns for creators"
           actionText="View All"
-          onActionPress={() => console.log('View campaigns')}
+          onActionPress={() => {}}
         />
         
         {topCampaigns.map((campaign) => {
@@ -221,7 +316,7 @@ export default function HomeScreen() {
                       labelStyle={styles.saveButtonLabel}
                       icon={isSaved ? 'bookmark' : 'bookmark-outline'}
                     >
-                      {isSaved ? 'Saved' : 'Save'}
+                      {isSaved ? 'Saved ✓' : 'Save'}
                     </Button>
                   </View>
                   <Text variant="bodyMedium" style={styles.campaignDescription}>
@@ -252,7 +347,7 @@ export default function HomeScreen() {
                     disabled={isApplied}
                     icon={isApplied ? 'check' : 'send'}
                   >
-                    {isApplied ? 'Applied' : 'Apply'}
+                    {isApplied ? 'Applied ✓' : 'Apply Now'}
                   </Button>
                 </View>
               </View>
@@ -422,5 +517,76 @@ const styles = StyleSheet.create({
   },
   appliedButtonText: {
     color: colors.success,
+  },
+  successCard: {
+    backgroundColor: colors.surface,
+    marginHorizontal: spacing.md,
+    marginVertical: spacing.sm,
+    borderRadius: radius.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.success,
+    ...shadow.sm,
+  },
+  successContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: spacing.md,
+  },
+  successText: {
+    color: colors.textPrimary,
+    marginLeft: spacing.sm,
+    fontWeight: '600',
+    flex: 1,
+  },
+  testCard: {
+    backgroundColor: colors.surface,
+    marginHorizontal: spacing.md,
+    marginBottom: spacing.lg,
+    borderRadius: radius.md,
+    borderLeftWidth: 4,
+    borderLeftColor: colors.secondary,
+    ...shadow.sm,
+  },
+  testContent: {
+    padding: spacing.md,
+  },
+  testTitle: {
+    color: colors.textPrimary,
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
+  testSubtitle: {
+    color: colors.textSecondary,
+    marginBottom: spacing.md,
+  },
+  testButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  testButton: {
+    flex: 1,
+    borderColor: colors.secondary,
+  },
+  testInfo: {
+    color: colors.textSecondary,
+    fontStyle: 'italic',
+    textAlign: 'center',
+  },
+  autoSaveContainer: {
+    marginBottom: spacing.md,
+    alignItems: 'center',
+  },
+  autoSaveButton: {
+    borderColor: colors.secondary,
+    minWidth: 150,
+  },
+  autoSaveEnabled: {
+    backgroundColor: colors.success,
+    borderColor: colors.success,
+  },
+  autoSaveStatus: {
+    marginTop: spacing.xs,
+    fontWeight: '600',
   },
 });

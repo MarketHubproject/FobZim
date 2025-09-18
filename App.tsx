@@ -7,8 +7,12 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import RootNavigator from './src/navigation/RootNavigator';
 import { paperTheme } from './src/theme/paperTheme';
 import { colors } from './src/theme/colors';
+import { useAppInitialization } from './src/hooks/useAppInitialization';
 
 export default function App() {
+  // Initialize app with persistence
+  useAppInitialization();
+  
   return (
     <SafeAreaProvider>
       <PaperProvider theme={paperTheme}>
