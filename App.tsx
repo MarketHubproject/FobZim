@@ -39,21 +39,13 @@ function CreatorsScreen() {
   return <EnhancedCreatorsScreen />;
 }
 
-// Simple Campaigns Screen
+// Import Enhanced Campaigns Screen
+import EnhancedCampaignsScreen from './src/screens/EnhancedCampaignsScreen';
+
+// Simple Campaigns Screen (now using enhanced version)
 function CampaignsScreen() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Appbar.Header style={{ backgroundColor: colors.primary }}>
-        <Appbar.Content title="Campaigns" titleStyle={{ color: colors.white }} />
-      </Appbar.Header>
-      
-      <View style={styles.centerContent}>
-        <MaterialCommunityIcons name="briefcase" size={64} color={colors.primary} />
-        <Text style={styles.title}>Brand Campaigns</Text>
-        <Text style={styles.subtitle}>Find opportunities to collaborate with brands</Text>
-      </View>
-    </SafeAreaView>
-  );
+  console.log('🎥 CampaignsScreen rendering...');
+  return <EnhancedCampaignsScreen />;
 }
 
 // Simple Messages Screen
