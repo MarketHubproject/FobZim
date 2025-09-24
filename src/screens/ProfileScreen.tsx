@@ -384,6 +384,213 @@ const enhancedProfileData = {
     ]
   },
   
+  // Professional Networking Data
+  networking: {
+    connections: [
+      {
+        id: 'conn_1',
+        name: 'Chipo Mukamuri',
+        username: '@chipo_styles',
+        avatar: 'https://images.unsplash.com/photo-1494790108755-2616b30c1b31?w=150',
+        role: 'Fashion Content Creator',
+        company: 'Freelance',
+        location: 'Bulawayo, Zimbabwe',
+        connectionType: 'collaborator',
+        connectionDate: '2023-10-15',
+        mutualConnections: 12,
+        collaborationCount: 3,
+        isVerified: false,
+        specialties: ['Fashion', 'Beauty', 'Lifestyle'],
+        lastInteraction: '2023-11-18',
+        status: 'active'
+      },
+      {
+        id: 'conn_2',
+        name: 'Blessing Chitapa',
+        username: '@blessing_adventures',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+        role: 'Adventure Photographer',
+        company: 'Wild Zimbabwe Tours',
+        location: 'Victoria Falls, Zimbabwe',
+        connectionType: 'mentor',
+        connectionDate: '2023-08-20',
+        mutualConnections: 8,
+        collaborationCount: 5,
+        isVerified: true,
+        specialties: ['Photography', 'Adventure', 'Wildlife'],
+        lastInteraction: '2023-11-20',
+        status: 'active'
+      },
+      {
+        id: 'conn_3',
+        name: 'Nomsa Dube',
+        username: '@nomsa_food',
+        avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150',
+        role: 'Culinary Content Creator',
+        company: 'ZimCuisine Co.',
+        location: 'Mutare, Zimbabwe',
+        connectionType: 'peer',
+        connectionDate: '2023-09-12',
+        mutualConnections: 15,
+        collaborationCount: 2,
+        isVerified: false,
+        specialties: ['Food', 'Culture', 'Cooking'],
+        lastInteraction: '2023-11-15',
+        status: 'active'
+      },
+      {
+        id: 'conn_4',
+        name: 'Tapiwa Matongo',
+        username: '@tapiwa_tech',
+        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+        role: 'Tech Content Specialist',
+        company: 'Innovation Hub Zimbabwe',
+        location: 'Harare, Zimbabwe',
+        connectionType: 'client',
+        connectionDate: '2023-07-30',
+        mutualConnections: 6,
+        collaborationCount: 1,
+        isVerified: true,
+        specialties: ['Technology', 'Innovation', 'Startups'],
+        lastInteraction: '2023-11-10',
+        status: 'active'
+      }
+    ],
+    collaborationHistory: [
+      {
+        id: 'collab_1',
+        title: 'Zimbabwe Fashion Week Coverage',
+        partners: ['@chipo_styles', '@nomsa_food'],
+        type: 'joint_campaign',
+        date: '2023-10-20',
+        duration: '3 days',
+        outcome: 'successful',
+        metrics: {
+          totalReach: 180000,
+          engagement: 14.2,
+          collaboratorSatisfaction: 4.8
+        },
+        description: 'Collaborative coverage of Zimbabwe Fashion Week featuring traditional and modern designs',
+        skills: ['Fashion Photography', 'Event Coverage', 'Social Media'],
+        testimonial: 'Amazing collaboration! Great teamwork and professional execution.'
+      },
+      {
+        id: 'collab_2',
+        title: 'Adventure Tourism Campaign',
+        partners: ['@blessing_adventures'],
+        type: 'mentorship',
+        date: '2023-09-05',
+        duration: '1 week',
+        outcome: 'successful',
+        metrics: {
+          totalReach: 95000,
+          engagement: 18.5,
+          collaboratorSatisfaction: 5.0
+        },
+        description: 'Learning advanced photography techniques while documenting adventure activities',
+        skills: ['Adventure Photography', 'Equipment Handling', 'Safety Protocols'],
+        testimonial: 'Excellent mentee - eager to learn and very professional.'
+      },
+      {
+        id: 'collab_3',
+        title: 'Tech Innovation Series',
+        partners: ['@tapiwa_tech'],
+        type: 'client_project',
+        date: '2023-08-15',
+        duration: '2 weeks',
+        outcome: 'successful',
+        metrics: {
+          totalReach: 65000,
+          engagement: 12.8,
+          collaboratorSatisfaction: 4.6
+        },
+        description: 'Documentary-style content featuring Zimbabwe\'s emerging tech ecosystem',
+        skills: ['Interview Techniques', 'Technical Content', 'Business Storytelling'],
+        testimonial: 'Professional service delivery and great storytelling ability.'
+      }
+    ],
+    workExperience: [
+      {
+        id: 'exp_1',
+        title: 'Senior Content Creator',
+        company: 'Freelance',
+        type: 'freelance',
+        startDate: '2023-03-01',
+        endDate: null,
+        current: true,
+        location: 'Harare, Zimbabwe',
+        description: 'Creating engaging content for travel, lifestyle, and cultural brands across Zimbabwe',
+        achievements: [
+          'Grew personal brand to 15K+ followers',
+          'Completed 42+ successful campaigns',
+          'Achieved 4.8/5 average client rating',
+          'Generated $12,450 in revenue'
+        ],
+        skills: ['Content Creation', 'Brand Partnerships', 'Social Media Marketing'],
+        clients: ['Zimbabwe Tourism Authority', 'EcoStyle Zimbabwe', 'ZimCuisine Co.']
+      },
+      {
+        id: 'exp_2',
+        title: 'Marketing Assistant',
+        company: 'Creative Agency Harare',
+        type: 'full_time',
+        startDate: '2022-06-01',
+        endDate: '2023-02-28',
+        current: false,
+        location: 'Harare, Zimbabwe',
+        description: 'Assisted in developing marketing strategies and content for local businesses',
+        achievements: [
+          'Managed social media for 15+ local brands',
+          'Increased average engagement by 45%',
+          'Contributed to $50K+ in client campaigns'
+        ],
+        skills: ['Social Media Management', 'Content Planning', 'Client Relations'],
+        supervisor: 'John Mpofu - Creative Director'
+      }
+    ],
+    recommendations: [
+      {
+        id: 'rec_1',
+        recommender: 'Sarah Mutindi',
+        recommenderRole: 'Marketing Director',
+        recommenderCompany: 'Zimbabwe Tourism Authority',
+        recommenderAvatar: 'https://images.unsplash.com/photo-1494790108755-2616b30c1b31?w=150',
+        relationship: 'Client',
+        date: '2023-11-20',
+        text: 'Tendai is an exceptional content creator with a deep understanding of Zimbabwe\'s tourism landscape. Her work on our Victoria Falls campaign delivered outstanding results and showcased true professionalism.',
+        skills: ['Content Creation', 'Tourism Marketing', 'Professional Communication'],
+        rating: 5
+      },
+      {
+        id: 'rec_2',
+        recommender: 'Blessing Chitapa',
+        recommenderRole: 'Senior Adventure Photographer',
+        recommenderCompany: 'Wild Zimbabwe Tours',
+        recommenderAvatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150',
+        relationship: 'Mentor/Collaborator',
+        date: '2023-10-15',
+        text: 'I had the pleasure of mentoring Tendai during our adventure tourism project. She demonstrates exceptional learning ability, creativity, and professional ethics. Highly recommended for any brand partnership.',
+        skills: ['Photography', 'Adventure Content', 'Learning Agility'],
+        rating: 5
+      }
+    ],
+    networkingGoals: [
+      'Connect with international tourism brands',
+      'Build relationships with fellow African creators',
+      'Find mentorship opportunities in content strategy',
+      'Collaborate on cross-cultural projects',
+      'Expand into video production partnerships'
+    ],
+    availability: {
+      openToCollaborations: true,
+      openToMentoring: true,
+      openToSpeaking: false,
+      responseTime: '2-4 hours',
+      preferredCollabTypes: ['brand_campaigns', 'content_collaborations', 'mentorship'],
+      unavailableDates: ['2023-12-20', '2023-12-25', '2024-01-01']
+    }
+  },
+  
   // Preferences
   preferences: {
     theme: 'default',
@@ -432,12 +639,22 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   const [portfolioModalVisible, setPortfolioModalVisible] = useState(false);
   const [portfolioItemModalVisible, setPortfolioItemModalVisible] = useState(false);
   const [testimonialsModalVisible, setTestimonialsModalVisible] = useState(false);
+  const [networkingModalVisible, setNetworkingModalVisible] = useState(false);
+  const [connectionsModalVisible, setConnectionsModalVisible] = useState(false);
+  const [collaborationHistoryModalVisible, setCollaborationHistoryModalVisible] = useState(false);
+  const [workExperienceModalVisible, setWorkExperienceModalVisible] = useState(false);
+  const [recommendationsModalVisible, setRecommendationsModalVisible] = useState(false);
   const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
   
   // Portfolio States
   const [selectedPortfolioItem, setSelectedPortfolioItem] = useState(null);
   const [portfolioFilter, setPortfolioFilter] = useState('all');
   const [portfolioLayout, setPortfolioLayout] = useState('grid');
+  
+  // Networking States
+  const [connectionFilter, setConnectionFilter] = useState('all');
+  const [selectedConnection, setSelectedConnection] = useState(null);
+  const [networkingTab, setNetworkingTab] = useState('connections');
   
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -461,6 +678,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
     showCertifications: true,
     showPortfolio: true,
     showTestimonials: true,
+    showNetworking: true,
+    showConnections: true,
+    showWorkExperience: true,
+    showRecommendations: true,
     portfolioLayout: profileData.preferences.portfolio.portfolioLayout,
     itemsPerRow: profileData.preferences.portfolio.itemsPerRow
   });
@@ -586,6 +807,60 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
       item.type.toLowerCase().includes(portfolioFilter.toLowerCase())
     );
   }, [profileData.portfolio.featuredWork, portfolioFilter]);
+
+  // Networking Handlers
+  const handleConnectionPress = useCallback((connection: any) => {
+    setSelectedConnection(connection);
+    Alert.alert(
+      `${connection.name}`,
+      `${connection.role} at ${connection.company}\n${connection.mutualConnections} mutual connections\n${connection.collaborationCount} past collaborations`,
+      [
+        { text: 'View Profile', onPress: () => console.log('View profile:', connection.username) },
+        { text: 'Send Message', onPress: () => console.log('Send message to:', connection.name) },
+        { text: 'Cancel', style: 'cancel' }
+      ]
+    );
+  }, []);
+
+  const handleConnectionFilterChange = useCallback((filter: string) => {
+    setConnectionFilter(filter);
+  }, []);
+
+  const handleNetworkingTabChange = useCallback((tab: string) => {
+    setNetworkingTab(tab);
+  }, []);
+
+  const getFilteredConnections = useCallback(() => {
+    if (connectionFilter === 'all') {
+      return profileData.networking.connections;
+    }
+    return profileData.networking.connections.filter(conn => 
+      conn.connectionType === connectionFilter ||
+      conn.specialties.some(specialty => 
+        specialty.toLowerCase().includes(connectionFilter.toLowerCase())
+      )
+    );
+  }, [profileData.networking.connections, connectionFilter]);
+
+  const handleCollaborationPress = useCallback((collaboration: any) => {
+    Alert.alert(
+      collaboration.title,
+      `Partners: ${collaboration.partners.join(', ')}\nType: ${collaboration.type}\nOutcome: ${collaboration.outcome}\nReach: ${collaboration.metrics.totalReach.toLocaleString()}\n\n"${collaboration.testimonial}"`,
+      [{ text: 'OK' }]
+    );
+  }, []);
+
+  const handleWorkExperiencePress = useCallback((experience: any) => {
+    const duration = experience.current ? 
+      `${new Date(experience.startDate).toLocaleDateString()} - Present` :
+      `${new Date(experience.startDate).toLocaleDateString()} - ${new Date(experience.endDate).toLocaleDateString()}`;
+    
+    Alert.alert(
+      `${experience.title} at ${experience.company}`,
+      `Duration: ${duration}\nLocation: ${experience.location}\n\n${experience.description}\n\nKey Achievements:\n• ${experience.achievements.join('\n• ')}`,
+      [{ text: 'OK' }]
+    );
+  }, []);
 
   // Enhanced Render Functions
   const renderProfileHeader = () => {
@@ -959,6 +1234,150 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
     )
   );
 
+  const renderNetworkingSection = () => (
+    customizations.showNetworking && (
+      <Card style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+        <Card.Content>
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons name="account-group" size={24} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Professional Network</Text>
+            <TouchableOpacity onPress={() => setNetworkingModalVisible(true)}>
+              <Text style={[styles.viewAllText, { color: colors.primary }]}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Network Stats */}
+          <View style={styles.networkStatsContainer}>
+            <TouchableOpacity 
+              style={styles.networkStatItem}
+              onPress={() => setConnectionsModalVisible(true)}
+            >
+              <Text style={[styles.networkStatNumber, { color: colors.primary }]}>
+                {profileData.networking.connections.length}
+              </Text>
+              <Text style={[styles.networkStatLabel, { color: colors.textSecondary }]}>Connections</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.networkStatItem}
+              onPress={() => setCollaborationHistoryModalVisible(true)}
+            >
+              <Text style={[styles.networkStatNumber, { color: colors.primary }]}>
+                {profileData.networking.collaborationHistory.length}
+              </Text>
+              <Text style={[styles.networkStatLabel, { color: colors.textSecondary }]}>Collaborations</Text>
+            </TouchableOpacity>
+            
+            <TouchableOpacity 
+              style={styles.networkStatItem}
+              onPress={() => setRecommendationsModalVisible(true)}
+            >
+              <Text style={[styles.networkStatNumber, { color: colors.primary }]}>
+                {profileData.networking.recommendations.length}
+              </Text>
+              <Text style={[styles.networkStatLabel, { color: colors.textSecondary }]}>Recommendations</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Recent Connections */}
+          <Text style={[styles.networkSubtitle, { color: colors.textPrimary }]}>Recent Connections</Text>
+          <View style={styles.connectionsPreview}>
+            {profileData.networking.connections.slice(0, 3).map((connection) => (
+              <TouchableOpacity
+                key={connection.id}
+                style={styles.connectionItem}
+                onPress={() => handleConnectionPress(connection)}
+              >
+                <View style={styles.connectionAvatar}>
+                  <Avatar.Image source={{ uri: connection.avatar }} size={50} />
+                  {connection.isVerified && (
+                    <View style={[styles.connectionVerifiedBadge, { backgroundColor: colors.primary }]}>
+                      <MaterialCommunityIcons name="check" size={12} color={colors.white} />
+                    </View>
+                  )}
+                </View>
+                <View style={styles.connectionInfo}>
+                  <Text style={[styles.connectionName, { color: colors.textPrimary }]} numberOfLines={1}>
+                    {connection.name}
+                  </Text>
+                  <Text style={[styles.connectionRole, { color: colors.textSecondary }]} numberOfLines={1}>
+                    {connection.role}
+                  </Text>
+                  <View style={styles.connectionMeta}>
+                    <MaterialCommunityIcons 
+                      name={connection.connectionType === 'mentor' ? 'school' : 
+                            connection.connectionType === 'client' ? 'briefcase' : 
+                            connection.connectionType === 'collaborator' ? 'handshake' : 'account'} 
+                      size={12} 
+                      color={colors.primary} 
+                    />
+                    <Text style={[styles.connectionType, { color: colors.primary }]}>
+                      {connection.connectionType.charAt(0).toUpperCase() + connection.connectionType.slice(1)}
+                    </Text>
+                  </View>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </Card.Content>
+      </Card>
+    )
+  );
+
+  const renderWorkExperienceSection = () => (
+    customizations.showWorkExperience && profileData.networking.workExperience.length > 0 && (
+      <Card style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+        <Card.Content>
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons name="briefcase" size={24} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Work Experience</Text>
+            <TouchableOpacity onPress={() => setWorkExperienceModalVisible(true)}>
+              <Text style={[styles.viewAllText, { color: colors.primary }]}>View All</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {profileData.networking.workExperience.map((experience) => (
+            <TouchableOpacity
+              key={experience.id}
+              style={styles.experienceItem}
+              onPress={() => handleWorkExperiencePress(experience)}
+            >
+              <View style={styles.experienceHeader}>
+                <View style={[styles.experienceIcon, { backgroundColor: colors.primary + '20' }]}>
+                  <MaterialCommunityIcons 
+                    name={experience.type === 'freelance' ? 'account-tie' : 'office-building'} 
+                    size={20} 
+                    color={colors.primary} 
+                  />
+                </View>
+                <View style={styles.experienceContent}>
+                  <Text style={[styles.experienceTitle, { color: colors.textPrimary }]}>
+                    {experience.title}
+                  </Text>
+                  <Text style={[styles.experienceCompany, { color: colors.primary }]}>
+                    {experience.company}
+                  </Text>
+                  <Text style={[styles.experienceDuration, { color: colors.textSecondary }]}>
+                    {new Date(experience.startDate).toLocaleDateString()} - 
+                    {experience.current ? 'Present' : new Date(experience.endDate).toLocaleDateString()}
+                  </Text>
+                </View>
+                {experience.current && (
+                  <View style={[styles.currentBadge, { backgroundColor: colors.success }]}>
+                    <Text style={[styles.currentBadgeText, { color: colors.white }]}>Current</Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[styles.experienceDescription, { color: colors.textPrimary }]} numberOfLines={2}>
+                {experience.description}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </Card.Content>
+      </Card>
+    )
+  );
+
   // Show loading or error states if needed
   if (!profileData) {
     return (
@@ -1008,6 +1427,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
         
         {/* Testimonials Section */}
         {renderTestimonialsSection()}
+        
+        {/* Professional Networking Section */}
+        {renderNetworkingSection()}
+        
+        {/* Work Experience Section */}
+        {renderWorkExperienceSection()}
         
         {/* Quick Actions */}
         <Card style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
@@ -1234,6 +1659,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                 <Switch
                   value={customizations.showTestimonials}
                   onValueChange={(value) => setCustomizations({ ...customizations, showTestimonials: value })}
+                  color={colors.primary}
+                />
+              )}
+            />
+            
+            <List.Item
+              title="Show Professional Network"
+              description="Display connections and networking info"
+              right={() => (
+                <Switch
+                  value={customizations.showNetworking}
+                  onValueChange={(value) => setCustomizations({ ...customizations, showNetworking: value })}
+                  color={colors.primary}
+                />
+              )}
+            />
+            
+            <List.Item
+              title="Show Work Experience"
+              description="Display professional work history"
+              right={() => (
+                <Switch
+                  value={customizations.showWorkExperience}
+                  onValueChange={(value) => setCustomizations({ ...customizations, showWorkExperience: value })}
                   color={colors.primary}
                 />
               )}
@@ -1884,6 +2333,119 @@ const styles = StyleSheet.create({
   },
   bottomSpacer: {
     height: 80,
+  },
+  
+  // Networking Styles
+  networkStatsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 16,
+  },
+  networkStatItem: {
+    alignItems: 'center',
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+  },
+  networkStatNumber: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  networkStatLabel: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  networkSubtitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 8,
+  },
+  connectionsPreview: {
+    gap: 12,
+  },
+  connectionItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 8,
+  },
+  connectionAvatar: {
+    position: 'relative',
+    marginRight: 12,
+  },
+  connectionVerifiedBadge: {
+    position: 'absolute',
+    bottom: -2,
+    right: -2,
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  connectionInfo: {
+    flex: 1,
+  },
+  connectionName: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  connectionRole: {
+    fontSize: 12,
+    marginBottom: 4,
+  },
+  connectionMeta: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  connectionType: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  experienceItem: {
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(0,0,0,0.08)',
+  },
+  experienceHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  experienceIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  experienceContent: {
+    flex: 1,
+  },
+  experienceTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  experienceCompany: {
+    fontSize: 12,
+    marginBottom: 2,
+  },
+  experienceDuration: {
+    fontSize: 12,
+  },
+  experienceDescription: {
+    fontSize: 12,
+    lineHeight: 18,
+  },
+  currentBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  currentBadgeText: {
+    fontSize: 10,
+    fontWeight: 'bold',
   },
   },
 });
