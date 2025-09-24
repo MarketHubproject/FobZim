@@ -57,30 +57,13 @@ function MessagesScreen() {
   return <EnhancedMessagesScreen />;
 }
 
-// Simple Profile Screen
+// Import Enhanced Profile Screen
+import EnhancedProfileScreen from './src/screens/EnhancedProfileScreen';
+
+// Simple Profile Screen (now using enhanced version)
 function ProfileScreen() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Appbar.Header style={{ backgroundColor: colors.primary }}>
-        <Appbar.Content title="Profile" titleStyle={{ color: colors.white }} />
-      </Appbar.Header>
-      
-      <View style={styles.centerContent}>
-        <MaterialCommunityIcons name="account-circle" size={64} color={colors.primary} />
-        <Text style={styles.title}>Your Profile</Text>
-        <Text style={styles.subtitle}>Manage your creator profile and settings</Text>
-        
-        <Button 
-          mode="contained" 
-          style={[styles.button, { marginTop: 20 }]}
-          buttonColor={colors.primary}
-          onPress={() => console.log('Edit profile pressed')}
-        >
-          Edit Profile
-        </Button>
-      </View>
-    </SafeAreaView>
-  );
+  console.log('👤 ProfileScreen rendering...');
+  return <EnhancedProfileScreen />;
 }
 
 // Main Tab Navigator
