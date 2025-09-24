@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   View, 
   Text, 
@@ -8,7 +8,11 @@ import {
   FlatList, 
   Dimensions,
   Image,
-  Alert
+  Alert,
+  RefreshControl,
+  Animated,
+  ActivityIndicator,
+  StatusBar
 } from 'react-native';
 import { 
   Card, 
@@ -18,10 +22,13 @@ import {
   Avatar, 
   Badge,
   Searchbar,
-  FAB
+  FAB,
+  Surface,
+  Skeleton
 } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
 
@@ -29,7 +36,7 @@ const colors = {
   primary: '#2E7D32',
   secondary: '#4CAF50',
   surface: '#FFFFFF',
-  background: '#F5F5F5',
+  background: '#F8FAF9',
   textPrimary: '#212121',
   textSecondary: '#757575',
   muted: '#BDBDBD',
@@ -38,9 +45,56 @@ const colors = {
   success: '#00C853',
   warning: '#FF9800',
   error: '#F44336',
+  gradient: {
+    primary: ['#2E7D32', '#4CAF50'],
+    secondary: ['#4CAF50', '#81C784'],
+    hero: ['#1B5E20', '#2E7D32', '#4CAF50'],
+    card: ['rgba(255,255,255,0.9)', 'rgba(255,255,255,1)'],
+  },
+  shadow: {
+    light: 'rgba(0,0,0,0.1)',
+    medium: 'rgba(0,0,0,0.15)',
+    dark: 'rgba(0,0,0,0.25)',
+  }
 };
 
 // Mock data
+const heroBanners = [
+  {
+    id: '1',
+    title: 'Zimbabwe Tourism Expo 2024',
+    subtitle: 'Showcase the beauty of Zimbabwe',
+    description: 'Join our biggest tourism campaign and earn up to $2,000',
+    image: 'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=800',
+    cta: 'Apply Now',
+    deadline: 'Ends in 3 days',
+    participants: '24 creators',
+    budget: '$2,000',
+  },
+  {
+    id: '2',
+    title: 'Sustainable Fashion Week',
+    subtitle: 'Eco-friendly fashion showcase',
+    description: 'Promote sustainable fashion brands across Zimbabwe',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800',
+    cta: 'Learn More',
+    deadline: 'Ends in 5 days',
+    participants: '18 creators',
+    budget: '$1,500',
+  },
+  {
+    id: '3',
+    title: 'Local Food Festival',
+    subtitle: 'Celebrate Zimbabwean cuisine',
+    description: 'Feature traditional and modern Zimbabwean dishes',
+    image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=800',
+    cta: 'Join Now',
+    deadline: 'Ends in 7 days',
+    participants: '31 creators',
+    budget: '$1,200',
+  },
+];
+
 const featuredCampaigns = [
   {
     id: '1',
@@ -115,11 +169,101 @@ export default function EnhancedHomeScreen() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [savedCampaigns, setSavedCampaigns] = useState<string[]>([]);
   const [followedCreators, setFollowedCreators] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [currentBannerIndex, setCurrentBannerIndex] = useState(0);
+  
+  // Animation values
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const slideAnim = useRef(new Animated.Value(50)).current;
+  const scaleAnim = useRef(new Animated.Value(0.95)).current;
+  const bannerFadeAnim = useRef(new Animated.Value(1)).current;
 
   const categories = ['All', 'Fashion', 'Lifestyle', 'Travel', 'Food', 'Tech'];
   const todaysTip = dailyTips[Math.floor(Math.random() * dailyTips.length)];
 
+  // Initialize animations and data loading
+  useEffect(() => {
+    loadInitialData();
+    startAnimations();
+    startBannerRotation();
+  }, []);
+
+  const loadInitialData = async () => {
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1500));
+    setIsLoading(false);
+  };
+
+  const startAnimations = () => {
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 800,
+        useNativeDriver: true,
+      }),
+      Animated.timing(slideAnim, {
+        toValue: 0,
+        duration: 600,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const startBannerRotation = () => {
+    const interval = setInterval(() => {
+      setCurrentBannerIndex(prevIndex => {
+        const nextIndex = (prevIndex + 1) % heroBanners.length;
+        
+        // Fade animation for banner transition
+        Animated.sequence([
+          Animated.timing(bannerFadeAnim, {
+            toValue: 0.3,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bannerFadeAnim, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+          }),
+        ]).start();
+        
+        return nextIndex;
+      });
+    }, 4000);
+
+    return () => clearInterval(interval);
+  };
+
+  const onRefresh = async () => {
+    setIsRefreshing(true);
+    // Simulate API refresh
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    setIsRefreshing(false);
+    Alert.alert('Refreshed', 'Content updated successfully!');
+  };
+
   const handleSaveCampaign = (campaignId: string) => {
+    // Add haptic feedback animation
+    Animated.sequence([
+      Animated.timing(scaleAnim, {
+        toValue: 1.05,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 1,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
     if (savedCampaigns.includes(campaignId)) {
       setSavedCampaigns(prev => prev.filter(id => id !== campaignId));
       Alert.alert('Success', 'Campaign removed from saved items');
@@ -243,21 +387,191 @@ export default function EnhancedHomeScreen() {
     </Card>
   );
 
-  const renderStatsCard = ({ item }: { item: any }) => (
-    <Card style={styles.statsCard}>
-      <Card.Content style={styles.statsContent}>
-        <MaterialCommunityIcons name={item.icon} size={32} color={item.color} />
-        <Text style={styles.statsValue}>{item.value}</Text>
-        <Text style={styles.statsLabel}>{item.label}</Text>
+  const renderHeroBanner = () => {
+    const currentBanner = heroBanners[currentBannerIndex];
+    
+    return (
+      <Animated.View style={[styles.heroContainer, { opacity: bannerFadeAnim }]}>
+        <LinearGradient
+          colors={colors.gradient.hero}
+          style={styles.heroGradient}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+        >
+          <Image source={{ uri: currentBanner.image }} style={styles.heroBackgroundImage} />
+          <LinearGradient
+            colors={['transparent', 'rgba(0,0,0,0.7)']}
+            style={styles.heroOverlay}
+          >
+            <View style={styles.heroContent}>
+              <Text style={styles.heroTitle}>{currentBanner.title}</Text>
+              <Text style={styles.heroSubtitle}>{currentBanner.subtitle}</Text>
+              <Text style={styles.heroDescription}>{currentBanner.description}</Text>
+              
+              <View style={styles.heroMeta}>
+                <View style={styles.heroMetaItem}>
+                  <MaterialCommunityIcons name="currency-usd" size={16} color={colors.white} />
+                  <Text style={styles.heroMetaText}>{currentBanner.budget}</Text>
+                </View>
+                <View style={styles.heroMetaItem}>
+                  <MaterialCommunityIcons name="clock-outline" size={16} color={colors.white} />
+                  <Text style={styles.heroMetaText}>{currentBanner.deadline}</Text>
+                </View>
+                <View style={styles.heroMetaItem}>
+                  <MaterialCommunityIcons name="account-group" size={16} color={colors.white} />
+                  <Text style={styles.heroMetaText}>{currentBanner.participants}</Text>
+                </View>
+              </View>
+              
+              <TouchableOpacity style={styles.heroCTA}>
+                <LinearGradient
+                  colors={colors.gradient.secondary}
+                  style={styles.heroCTAGradient}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                >
+                  <Text style={styles.heroCTAText}>{currentBanner.cta}</Text>
+                  <MaterialCommunityIcons name="arrow-right" size={16} color={colors.white} />
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
+          </LinearGradient>
+          
+          {/* Banner Indicators */}
+          <View style={styles.bannerIndicators}>
+            {heroBanners.map((_, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.bannerDot,
+                  index === currentBannerIndex && styles.activeBannerDot
+                ]}
+                onPress={() => setCurrentBannerIndex(index)}
+              />
+            ))}
+          </View>
+        </LinearGradient>
+      </Animated.View>
+    );
+  };
+
+  const renderSkeletonCard = () => (
+    <Card style={styles.campaignCard}>
+      <Skeleton height={160} style={styles.skeletonImage} />
+      <Card.Content style={styles.campaignContent}>
+        <Skeleton height={20} width="80%" style={styles.skeletonLine} />
+        <Skeleton height={16} width="60%" style={styles.skeletonLine} />
+        <Skeleton height={14} width="100%" style={styles.skeletonLine} />
+        <View style={styles.campaignMeta}>
+          <Skeleton height={12} width="25%" />
+          <Skeleton height={12} width="25%" />
+          <Skeleton height={12} width="25%" />
+        </View>
+        <View style={styles.campaignActions}>
+          <Skeleton height={36} width="70%" />
+          <Skeleton height={24} width={24} style={styles.skeletonIcon} />
+        </View>
       </Card.Content>
     </Card>
   );
 
+  const renderSkeletonCreator = () => (
+    <Card style={styles.creatorCard}>
+      <View style={styles.creatorContent}>
+        <Skeleton height={60} width={60} style={styles.skeletonAvatar} />
+        <View style={styles.creatorInfo}>
+          <Skeleton height={16} width="70%" style={styles.skeletonLine} />
+          <Skeleton height={14} width="50%" style={styles.skeletonLine} />
+          <Skeleton height={12} width="60%" style={styles.skeletonLine} />
+        </View>
+        <Skeleton height={32} width={80} style={styles.skeletonButton} />
+      </View>
+    </Card>
+  );
+
+  const renderStatsCard = ({ item }: { item: any }) => (
+    <Animated.View style={[{ transform: [{ scale: scaleAnim }] }]}>
+      <Card style={[styles.statsCard, styles.enhancedShadow]}>
+        <LinearGradient
+          colors={colors.gradient.card}
+          style={styles.statsGradient}
+        >
+          <Card.Content style={styles.statsContent}>
+            <View style={styles.statsIconContainer}>
+              <MaterialCommunityIcons name={item.icon} size={32} color={item.color} />
+            </View>
+            <Text style={styles.statsValue}>{item.value}</Text>
+            <Text style={styles.statsLabel}>{item.label}</Text>
+          </Card.Content>
+        </LinearGradient>
+      </Card>
+    </Animated.View>
+  );
+
+  if (isLoading) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+        <Appbar.Header style={styles.header}>
+          <Appbar.Content title="ZimBuzz" titleStyle={styles.headerTitle} />
+        </Appbar.Header>
+        
+        <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+          {/* Loading Hero Banner */}
+          <Card style={styles.heroContainer}>
+            <Skeleton height={240} style={styles.skeletonHero} />
+          </Card>
+          
+          {/* Loading Welcome Section */}
+          <View style={styles.welcomeSection}>
+            <Skeleton height={32} width="60%" style={[styles.skeletonLine, { alignSelf: 'center' }]} />
+            <Skeleton height={20} width="80%" style={[styles.skeletonLine, { alignSelf: 'center' }]} />
+          </View>
+          
+          {/* Loading Stats */}
+          <FlatList
+            data={[1, 2, 3]}
+            renderItem={() => (
+              <Card style={styles.statsCard}>
+                <Skeleton height={100} style={styles.skeletonStats} />
+              </Card>
+            )}
+            horizontal
+            contentContainerStyle={styles.statsContainer}
+            showsHorizontalScrollIndicator={false}
+          />
+          
+          {/* Loading Campaigns */}
+          <FlatList
+            data={[1, 2]}
+            renderItem={renderSkeletonCard}
+            horizontal
+            contentContainerStyle={styles.horizontalList}
+            showsHorizontalScrollIndicator={false}
+          />
+          
+          {/* Loading Creators */}
+          <FlatList
+            data={[1, 2, 3]}
+            renderItem={renderSkeletonCreator}
+            scrollEnabled={false}
+          />
+        </ScrollView>
+        
+        <View style={styles.loadingOverlay}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text style={styles.loadingText}>Loading amazing content...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <Appbar.Header style={styles.header}>
+      <StatusBar barStyle="light-content" backgroundColor={colors.primary} />
+      <Appbar.Header style={[styles.header, styles.enhancedShadow]}>
         <Appbar.Content 
-          title="FobZim" 
+          title="ZimBuzz" 
           titleStyle={styles.headerTitle}
         />
         <Appbar.Action 
@@ -276,88 +590,152 @@ export default function EnhancedHomeScreen() {
         style={styles.content} 
         contentContainerStyle={styles.contentContainer}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={isRefreshing}
+            onRefresh={onRefresh}
+            colors={[colors.primary, colors.secondary]}
+            progressBackgroundColor={colors.white}
+            tintColor={colors.primary}
+          />
+        }
       >
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
+        {/* Hero Banner */}
+        {renderHeroBanner()}
+        
+        {/* Welcome Section with Animation */}
+        <Animated.View 
+          style={[
+            styles.welcomeSection, 
+            { 
+              opacity: fadeAnim,
+              transform: [{ translateY: slideAnim }]
+            }
+          ]}
+        >
           <Text style={styles.greeting}>Welcome back! 🇿🇼</Text>
           <Text style={styles.subtitle}>Discover new opportunities and connect with brands</Text>
-        </View>
+        </Animated.View>
 
-        {/* Search Bar */}
-        <Searchbar
-          placeholder="Search campaigns, creators..."
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-          style={styles.searchBar}
-          inputStyle={styles.searchInput}
-        />
+        {/* Search Bar with Animation */}
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ translateY: slideAnim }] }}>
+          <Searchbar
+            placeholder="Search campaigns, creators..."
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            style={[styles.searchBar, styles.enhancedShadow]}
+            inputStyle={styles.searchInput}
+          />
+        </Animated.View>
 
-        {/* Stats Section */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Platform Stats</Text>
-        </View>
-        <FlatList
-          data={statsData}
-          renderItem={renderStatsCard}
-          keyExtractor={item => item.label}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.statsContainer}
-        />
+        {/* Stats Section with Animation */}
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Platform Stats</Text>
+          </View>
+          <FlatList
+            data={statsData}
+            renderItem={renderStatsCard}
+            keyExtractor={item => item.label}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.statsContainer}
+          />
+        </Animated.View>
 
-        {/* Daily Tip */}
-        <Card style={styles.tipCard}>
-          <Card.Content>
-            <View style={styles.tipHeader}>
-              <MaterialCommunityIcons name="lightbulb" size={24} color={colors.secondary} />
-              <Text style={styles.tipTitle}>Creator Tip of the Day</Text>
-            </View>
-            <Text style={styles.tipText}>{todaysTip}</Text>
-          </Card.Content>
-        </Card>
+        {/* Daily Tip with Enhanced Design */}
+        <Animated.View style={{ opacity: fadeAnim, transform: [{ scale: scaleAnim }] }}>
+          <Card style={[styles.tipCard, styles.enhancedShadow]}>
+            <LinearGradient
+              colors={[colors.secondary, colors.primary]}
+              style={styles.tipGradient}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+            >
+              <Card.Content>
+                <View style={styles.tipHeader}>
+                  <MaterialCommunityIcons name="lightbulb" size={24} color={colors.white} />
+                  <Text style={styles.tipTitle}>Creator Tip of the Day</Text>
+                </View>
+                <Text style={styles.tipText}>{todaysTip}</Text>
+              </Card.Content>
+            </LinearGradient>
+          </Card>
+        </Animated.View>
 
         {/* Featured Campaigns */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Featured Campaigns</Text>
-          <TouchableOpacity onPress={() => Alert.alert('View All', 'Navigate to all campaigns')}>
-            <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
-        </View>
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Featured Campaigns</Text>
+            <TouchableOpacity onPress={() => Alert.alert('View All', 'Navigate to all campaigns')}>
+              <LinearGradient
+                colors={colors.gradient.primary}
+                style={styles.viewAllGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={styles.viewAllText}>View All</Text>
+                <MaterialCommunityIcons name="arrow-right" size={14} color={colors.white} />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
 
-        <FlatList
-          data={featuredCampaigns}
-          renderItem={renderCampaignCard}
-          keyExtractor={item => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
-        />
+          <FlatList
+            data={featuredCampaigns}
+            renderItem={renderCampaignCard}
+            keyExtractor={item => item.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        </Animated.View>
 
         {/* Trending Creators */}
-        <View style={styles.sectionHeader}>
-          <Text style={styles.sectionTitle}>Trending Creators</Text>
-          <TouchableOpacity onPress={() => Alert.alert('View All', 'Navigate to all creators')}>
-            <Text style={styles.viewAllText}>View All</Text>
-          </TouchableOpacity>
-        </View>
+        <Animated.View style={{ opacity: fadeAnim }}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Trending Creators</Text>
+            <TouchableOpacity onPress={() => Alert.alert('View All', 'Navigate to all creators')}>
+              <LinearGradient
+                colors={colors.gradient.secondary}
+                style={styles.viewAllGradient}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+              >
+                <Text style={styles.viewAllText}>View All</Text>
+                <MaterialCommunityIcons name="arrow-right" size={14} color={colors.white} />
+              </LinearGradient>
+            </TouchableOpacity>
+          </View>
 
-        <FlatList
-          data={trendingCreators}
-          renderItem={renderCreatorCard}
-          keyExtractor={item => item.id}
-          showsVerticalScrollIndicator={false}
-          scrollEnabled={false}
-        />
+          <FlatList
+            data={trendingCreators}
+            renderItem={renderCreatorCard}
+            keyExtractor={item => item.id}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}
+          />
+        </Animated.View>
 
         <View style={styles.spacer} />
       </ScrollView>
 
-      {/* Floating Action Button */}
-      <FAB
-        icon="plus"
-        style={styles.fab}
-        onPress={() => Alert.alert('Create', 'Create new campaign or content')}
-      />
+      {/* Enhanced Floating Action Button */}
+      <Animated.View style={{ transform: [{ scale: scaleAnim }] }}>
+        <TouchableOpacity
+          style={styles.fabContainer}
+          onPress={() => Alert.alert('Create', 'Create new campaign or content')}
+          activeOpacity={0.8}
+        >
+          <LinearGradient
+            colors={colors.gradient.primary}
+            style={styles.fab}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+          >
+            <MaterialCommunityIcons name="plus" size={24} color={colors.white} />
+          </LinearGradient>
+        </TouchableOpacity>
+      </Animated.View>
     </SafeAreaView>
   );
 }
@@ -369,12 +747,20 @@ const styles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.primary,
-    elevation: 4,
+    elevation: 8,
   },
   headerTitle: {
     color: colors.white,
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
+  },
+  enhancedShadow: {
+    elevation: 8,
+    shadowColor: colors.shadow.dark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   content: {
     flex: 1,
@@ -382,28 +768,181 @@ const styles = StyleSheet.create({
   contentContainer: {
     paddingBottom: 100,
   },
-  welcomeSection: {
-    padding: 16,
+  // Hero Banner Styles
+  heroContainer: {
+    height: 280,
+    marginBottom: 16,
+    borderRadius: 20,
+    marginHorizontal: 16,
+    overflow: 'hidden',
+    elevation: 8,
+  },
+  heroGradient: {
+    flex: 1,
+    position: 'relative',
+  },
+  heroBackgroundImage: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    resizeMode: 'cover',
+    opacity: 0.8,
+  },
+  heroOverlay: {
+    flex: 1,
+    justifyContent: 'flex-end',
+    padding: 24,
+  },
+  heroContent: {
+    flex: 1,
+    justifyContent: 'flex-end',
+  },
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: colors.white,
+    marginBottom: 8,
+    textShadowColor: colors.shadow.dark,
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: colors.white,
+    opacity: 0.9,
+    marginBottom: 8,
+  },
+  heroDescription: {
+    fontSize: 14,
+    color: colors.white,
+    opacity: 0.8,
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  heroMeta: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    paddingHorizontal: 8,
+  },
+  heroMetaItem: {
+    flexDirection: 'row',
     alignItems: 'center',
   },
+  heroMetaText: {
+    color: colors.white,
+    fontSize: 12,
+    fontWeight: '600',
+    marginLeft: 4,
+  },
+  heroCTA: {
+    alignSelf: 'flex-start',
+    borderRadius: 25,
+    overflow: 'hidden',
+    elevation: 4,
+  },
+  heroCTAGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+  },
+  heroCTAText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: 'bold',
+    marginRight: 8,
+  },
+  bannerIndicators: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 16,
+    right: 24,
+  },
+  bannerDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255,255,255,0.4)',
+    marginLeft: 8,
+  },
+  activeBannerDot: {
+    backgroundColor: colors.white,
+    width: 20,
+  },
+
+  // Loading Styles
+  loadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(248,250,249,0.9)',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
+    color: colors.primary,
+    fontWeight: '600',
+  },
+  skeletonHero: {
+    borderRadius: 20,
+  },
+  skeletonImage: {
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  skeletonLine: {
+    marginBottom: 8,
+    borderRadius: 4,
+  },
+  skeletonIcon: {
+    borderRadius: 12,
+  },
+  skeletonAvatar: {
+    borderRadius: 30,
+    marginRight: 12,
+  },
+  skeletonButton: {
+    borderRadius: 16,
+  },
+  skeletonStats: {
+    borderRadius: 12,
+  },
+
+  welcomeSection: {
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+  },
   greeting: {
-    fontSize: 28,
+    fontSize: 30,
     fontWeight: 'bold',
     color: colors.primary,
     textAlign: 'center',
     marginBottom: 8,
+    textShadowColor: colors.shadow.light,
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   subtitle: {
     fontSize: 16,
     color: colors.textSecondary,
     textAlign: 'center',
+    lineHeight: 22,
   },
   searchBar: {
     margin: 16,
-    elevation: 2,
+    elevation: 6,
+    borderRadius: 25,
+    backgroundColor: colors.white,
   },
   searchInput: {
     fontSize: 16,
+    paddingLeft: 8,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -418,25 +957,43 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   viewAllText: {
-    fontSize: 14,
-    color: colors.primary,
+    fontSize: 12,
+    color: colors.white,
     fontWeight: '600',
+  },
+  viewAllGradient: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
   },
   statsContainer: {
     paddingHorizontal: 16,
     paddingBottom: 8,
   },
   statsCard: {
-    marginRight: 12,
-    minWidth: 100,
-    elevation: 2,
+    marginRight: 16,
+    minWidth: 120,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  statsGradient: {
+    flex: 1,
   },
   statsContent: {
     alignItems: 'center',
-    paddingVertical: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 16,
+  },
+  statsIconContainer: {
+    backgroundColor: 'rgba(46, 125, 50, 0.1)',
+    padding: 12,
+    borderRadius: 20,
+    marginBottom: 8,
   },
   statsValue: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
     color: colors.textPrimary,
     marginTop: 8,
@@ -446,11 +1003,15 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     textAlign: 'center',
     marginTop: 4,
+    fontWeight: '600',
   },
   tipCard: {
     margin: 16,
-    elevation: 2,
-    backgroundColor: colors.surface,
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  tipGradient: {
+    flex: 1,
   },
   tipHeader: {
     flexDirection: 'row',
@@ -460,13 +1021,14 @@ const styles = StyleSheet.create({
   tipTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color: colors.textPrimary,
+    color: colors.white,
     marginLeft: 8,
   },
   tipText: {
     fontSize: 16,
-    color: colors.textSecondary,
+    color: colors.white,
     lineHeight: 24,
+    opacity: 0.9,
   },
   horizontalList: {
     paddingHorizontal: 16,
@@ -615,12 +1177,23 @@ const styles = StyleSheet.create({
   followButtonLabel: {
     fontSize: 12,
   },
-  fab: {
+  fabContainer: {
     position: 'absolute',
     margin: 16,
     right: 0,
     bottom: 0,
-    backgroundColor: colors.primary,
+  },
+  fab: {
+    width: 56,
+    height: 56,
+    borderRadius: 28,
+    justifyContent: 'center',
+    alignItems: 'center',
+    elevation: 8,
+    shadowColor: colors.shadow.dark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
   spacer: {
     height: 20,
