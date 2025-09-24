@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, FlatList, RefreshControl } from 'react-native';
+import React, { useState, useMemo, useEffect } from 'react';
+import { View, StyleSheet, FlatList, RefreshControl } from 'react-native';
 import { Text, Card, Button } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
@@ -10,20 +10,32 @@ import CreatorCard from '../../components/CreatorCard';
 import PostPreview from '../../components/PostPreview';
 import SectionHeader from '../../components/SectionHeader';
 import LoadingOverlay from '../../components/LoadingOverlay';
+import AnimatedSuccessMessage from '../../components/AnimatedSuccessMessage';
+import { 
+  HorizontalCreatorListSkeleton, 
+  StatsBarSkeleton, 
+  HomeScreenSkeleton 
+} from '../../components/SkeletonLoaders';
 
 import { mockCreators, mockPosts, mockCampaigns, dailyTips } from '../../data/mockData';
 import { Creator, Post, Campaign } from '../../data/types';
 import { useAppStore } from '../../store/simpleStore';
 
 export default function HomeScreen() {
+  console.log('🏠 HomeScreen rendering...');
+  
   const { 
-    savedTips, 
+    savedTips,
     savedCampaignIds, 
-    appliedCampaignIds, 
+    appliedCampaignIds,
+    savedCreatorIds,
+    followedCreatorIds,
     saveTip, 
     removeSavedTip, 
     toggleSaveCampaign, 
     markCampaignApplied,
+    toggleSaveCreator,
+    toggleFollowCreator,
     saveToStorage,
     loadFromStorage,
     clearStorage,
@@ -34,14 +46,60 @@ export default function HomeScreen() {
   
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [successMessage, setSuccessMessage] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
   
-  // Get data for home screen
-  const spotlightCreators = mockCreators.filter(creator => creator.spotlight).slice(0, 5);
-  const recentPosts = mockPosts.slice(0, 10);
-  const topCampaigns = mockCampaigns.slice(0, 3);
-  const todaysTip = dailyTips[Math.floor(Math.random() * dailyTips.length)];
+  // Simulate initial loading
+  useEffect(() => {
+    const loadInitialData = async () => {
+      // Simulate API call delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      setInitialLoading(false);
+    };
+    
+    loadInitialData();
+  }, []);
+  
+  // Optimize data with useMemo for better performance
+  const { spotlightCreators, recentPosts, topCampaigns, todaysTip, homeData } = useMemo(() => {
+    // Show skeleton data while loading
+    if (initialLoading) {
+      return {
+        spotlightCreators: [],
+        recentPosts: [],
+        topCampaigns: [],
+        todaysTip: '',
+        homeData: [{ id: 'skeleton', type: 'skeleton' }]
+      };
+    }
+    
+    const spotlight = mockCreators.filter(creator => creator.spotlight).slice(0, 5);
+    const recent = mockPosts.slice(0, 10);
+    const campaigns = mockCampaigns.slice(0, 3);
+    const tip = dailyTips[Math.floor(Math.random() * dailyTips.length)];
+    
+    // Create sections for FlatList
+    const sections = [
+      { id: 'welcome', type: 'welcome' },
+      { id: 'tip', type: 'tip', data: tip },
+      { id: 'creators-header', type: 'section-header', title: 'Spotlight Creators', subtitle: 'Rising stars from Zimbabwe' },
+      { id: 'creators', type: 'horizontal-creators', data: spotlight },
+      { id: 'posts-header', type: 'section-header', title: 'Latest Content', subtitle: 'Fresh posts from creators' },
+      { id: 'posts', type: 'horizontal-posts', data: recent },
+      { id: 'campaigns-header', type: 'section-header', title: 'Brand Opportunities', subtitle: 'Featured campaigns for creators' },
+      ...campaigns.map(campaign => ({ id: campaign.id, type: 'campaign', data: campaign })),
+      { id: 'spacer', type: 'spacer' }
+    ];
+    
+    return {
+      spotlightCreators: spotlight,
+      recentPosts: recent,
+      topCampaigns: campaigns,
+      todaysTip: tip,
+      homeData: sections
+    };
+  }, [savedTips, savedCampaignIds, appliedCampaignIds, showSuccess, initialLoading]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -87,42 +145,11 @@ export default function HomeScreen() {
     setSuccessMessage('');
   };
 
-  const handleSaveToStorage = async () => {
-    setLoading(true);
-    const success = await saveToStorage();
-    setLoading(false);
-    showSuccessToast(success ? '💾 Data saved to storage!' : '❌ Failed to save data');
-  };
-
-  const handleLoadFromStorage = async () => {
-    setLoading(true);
-    await loadFromStorage();
-    setLoading(false);
-    showSuccessToast('🔄 Data loaded from storage!');
-  };
-
-  const handleClearStorage = async () => {
-    setLoading(true);
-    const success = await clearStorage();
-    setLoading(false);
-    showSuccessToast(success ? '🗑️ Storage cleared!' : '❌ Failed to clear storage');
-  };
-
-  const handleToggleAutoSave = () => {
-    if (autoSaveEnabled) {
-      disableAutoSave();
-      showSuccessToast('⏸️ Auto-save disabled');
-    } else {
-      enableAutoSave();
-      showSuccessToast('▶️ Auto-save enabled');
-    }
-  };
-
   const renderCreator = ({ item }: { item: Creator }) => (
     <CreatorCard 
       creator={item} 
       compact
-      onPress={() => {}}
+      onPress={() => showSuccessToast(`👤 Viewing ${item.name}'s profile`)}
     />
   );
 
@@ -134,9 +161,162 @@ export default function HomeScreen() {
     />
   );
 
+  // Main render item function for optimized FlatList
+  const renderHomeItem = ({ item }: { item: any }) => {
+    switch (item.type) {
+      case 'welcome':
+        return (
+          <View style={styles.welcomeSection}>
+            <Text variant="headlineMedium" style={styles.greeting}>
+              Welcome to FobZim! 🇿🇼
+            </Text>
+            <Text variant="bodyLarge" style={styles.subtitle}>
+              Discover Zimbabwe's rising content creators
+            </Text>
+          </View>
+        );
+        
+      case 'tip':
+        return (
+          <Card style={styles.tipCard} elevation={2}>
+            <View style={styles.tipContent}>
+              <View style={styles.tipHeader}>
+                <MaterialCommunityIcons 
+                  name="lightbulb" 
+                  size={24} 
+                  color={colors.secondary} 
+                />
+                <Text variant="titleMedium" style={styles.tipTitle}>
+                  Creator Tip of the Day
+                </Text>
+              </View>
+              <Text variant="bodyMedium" style={styles.tipText}>
+                {item.data}
+              </Text>
+              <View style={styles.tipActions}>
+                <Button
+                  mode={savedTips.includes(item.data) ? 'contained' : 'outlined'}
+                  onPress={() => handleSaveTip(item.data)}
+                  style={styles.saveTipButton}
+                  icon={savedTips.includes(item.data) ? 'bookmark' : 'bookmark-outline'}
+                  labelStyle={styles.saveTipLabel}
+                >
+                  {savedTips.includes(item.data) ? 'Saved ✓' : 'Save Tip'}
+                </Button>
+              </View>
+            </View>
+          </Card>
+        );
+        
+      case 'section-header':
+        return (
+          <SectionHeader 
+            title={item.title} 
+            subtitle={item.subtitle}
+            actionText="See All"
+            onActionPress={() => {}}
+          />
+        );
+        
+      case 'horizontal-creators':
+        return (
+          <FlatList
+            data={item.data}
+            renderItem={renderCreator}
+            keyExtractor={(creator) => creator.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        );
+        
+      case 'horizontal-posts':
+        return (
+          <FlatList
+            data={item.data}
+            renderItem={renderPost}
+            keyExtractor={(post) => post.id}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.horizontalList}
+          />
+        );
+        
+      case 'campaign':
+        const campaign = item.data;
+        const isApplied = appliedCampaignIds.includes(campaign.id);
+        const isSaved = savedCampaignIds.includes(campaign.id);
+        
+        return (
+          <Card key={campaign.id} style={styles.campaignCard} elevation={2}>
+            <View style={styles.campaignContent}>
+              <View style={styles.campaignInfo}>
+                <View style={styles.campaignHeader}>
+                  <Text variant="titleMedium" style={styles.campaignTitle}>
+                    {campaign.brand}
+                  </Text>
+                  <Button
+                    mode="text"
+                    onPress={() => handleSaveCampaign(campaign.id)}
+                    style={styles.saveButton}
+                    labelStyle={styles.saveButtonLabel}
+                    icon={isSaved ? 'bookmark' : 'bookmark-outline'}
+                  >
+                    {isSaved ? 'Saved ✓' : 'Save'}
+                  </Button>
+                </View>
+                <Text variant="bodyMedium" style={styles.campaignDescription}>
+                  {campaign.title}
+                </Text>
+                <View style={styles.campaignMeta}>
+                  <View style={styles.budgetContainer}>
+                    <MaterialCommunityIcons 
+                      name="currency-usd" 
+                      size={16} 
+                      color={colors.success} 
+                    />
+                    <Text variant="bodySmall" style={styles.budgetText}>
+                      ${campaign.budgetUSD}
+                    </Text>
+                  </View>
+                  <Text variant="bodySmall" style={styles.deadlineText}>
+                    Deadline: {new Date(campaign.deadlineISO).toLocaleDateString()}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.campaignActions}>
+                <Button 
+                  mode={isApplied ? "outlined" : "contained"}
+                  style={[styles.applyButton, isApplied && styles.appliedButton]}
+                  labelStyle={[styles.applyButtonText, isApplied && styles.appliedButtonText]}
+                  onPress={() => handleApplyToCampaign(campaign)}
+                  disabled={isApplied}
+                  icon={isApplied ? 'check' : 'send'}
+                >
+                  {isApplied ? 'Applied ✓' : 'Apply Now'}
+                </Button>
+              </View>
+            </View>
+          </Card>
+        );
+        
+      case 'spacer':
+        return <View style={styles.bottomSpacing} />;
+        
+      case 'skeleton':
+        return <HomeScreenSkeleton />;
+        
+      default:
+        return null;
+    }
+  };
+
   return (
     <>
-      <ScrollView 
+      <FlatList
+        data={homeData}
+        renderItem={renderHomeItem}
+        keyExtractor={(item) => item.id}
         style={styles.container}
         refreshControl={
           <RefreshControl 
@@ -146,218 +326,22 @@ export default function HomeScreen() {
             tintColor={colors.primary}
           />
         }
-      >
-        {/* Welcome Section */}
-        <View style={styles.welcomeSection}>
-          <Text variant="headlineMedium" style={styles.greeting}>
-            Welcome to FobZim! 🇿🇼
-          </Text>
-          <Text variant="bodyLarge" style={styles.subtitle}>
-            Discover Zimbabwe's rising content creators
-          </Text>
-        </View>
-
-        {/* Persistence Testing (Development only) */}
-        <Card style={styles.testCard} elevation={2}>
-          <View style={styles.testContent}>
-            <Text variant="titleMedium" style={styles.testTitle}>
-              🔧 Persistence Testing
-            </Text>
-            <Text variant="bodySmall" style={styles.testSubtitle}>
-              Test data saving/loading (Development mode)
-            </Text>
-            <View style={styles.autoSaveContainer}>
-              <Button
-                mode={autoSaveEnabled ? 'contained' : 'outlined'}
-                onPress={handleToggleAutoSave}
-                style={[styles.autoSaveButton, autoSaveEnabled && styles.autoSaveEnabled]}
-                icon={autoSaveEnabled ? 'pause' : 'play'}
-              >
-                {autoSaveEnabled ? 'Auto-Save ON' : 'Auto-Save OFF'}
-              </Button>
-            </View>
-            <View style={styles.testButtons}>
-              <Button
-                mode="outlined"
-                onPress={handleSaveToStorage}
-                style={styles.testButton}
-                icon="content-save"
-              >
-                Save Data
-              </Button>
-              <Button
-                mode="outlined"
-                onPress={handleLoadFromStorage}
-                style={styles.testButton}
-                icon="reload"
-              >
-                Load Data
-              </Button>
-              <Button
-                mode="outlined"
-                onPress={handleClearStorage}
-                style={styles.testButton}
-                icon="delete"
-              >
-                Clear Storage
-              </Button>
-            </View>
-            <Text variant="bodySmall" style={styles.testInfo}>
-              💡 Saved Tips: {savedTips.length} | Campaigns: {savedCampaignIds.length}
-            </Text>
-            <Text variant="bodySmall" style={[styles.testInfo, styles.autoSaveStatus]}>
-              🤖 Auto-Save: {autoSaveEnabled ? '✅ ENABLED' : '❌ DISABLED'}
-            </Text>
-          </View>
-        </Card>
-
-        {/* Daily Tip */}
-        <Card style={styles.tipCard} elevation={2}>
-          <View style={styles.tipContent}>
-            <View style={styles.tipHeader}>
-              <MaterialCommunityIcons 
-                name="lightbulb" 
-                size={24} 
-                color={colors.secondary} 
-              />
-              <Text variant="titleMedium" style={styles.tipTitle}>
-                Creator Tip of the Day
-              </Text>
-            </View>
-            <Text variant="bodyMedium" style={styles.tipText}>
-              {todaysTip}
-            </Text>
-            <View style={styles.tipActions}>
-              <Button
-                mode={savedTips.includes(todaysTip) ? 'contained' : 'outlined'}
-                onPress={() => handleSaveTip(todaysTip)}
-                style={styles.saveTipButton}
-                icon={savedTips.includes(todaysTip) ? 'bookmark' : 'bookmark-outline'}
-                labelStyle={styles.saveTipLabel}
-              >
-                {savedTips.includes(todaysTip) ? 'Saved ✓' : 'Save Tip'}
-              </Button>
-            </View>
-          </View>
-        </Card>
-
-        {/* Success Message */}
-        {showSuccess && (
-          <Card style={styles.successCard} elevation={3}>
-            <View style={styles.successContent}>
-              <MaterialCommunityIcons 
-                name="check-circle" 
-                size={20} 
-                color={colors.success} 
-              />
-              <Text variant="bodyMedium" style={styles.successText}>
-                {successMessage}
-              </Text>
-            </View>
-          </Card>
-        )}
-
-        {/* Spotlight Creators */}
-        <SectionHeader 
-          title="Spotlight Creators" 
-          subtitle="Rising stars from Zimbabwe"
-          actionText="See All"
-          onActionPress={() => {}}
-        />
-        <FlatList
-          data={spotlightCreators}
-          renderItem={renderCreator}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
-        />
-
-        {/* Latest Content */}
-        <SectionHeader 
-          title="Latest Content" 
-          subtitle="Fresh posts from creators"
-          actionText="Explore"
-          onActionPress={() => {}}
-        />
-        <FlatList
-          data={recentPosts}
-          renderItem={renderPost}
-          keyExtractor={(item) => item.id}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.horizontalList}
-        />
-
-        {/* Brand Campaigns */}
-        <SectionHeader 
-          title="Brand Opportunities" 
-          subtitle="Featured campaigns for creators"
-          actionText="View All"
-          onActionPress={() => {}}
-        />
-        
-        {topCampaigns.map((campaign) => {
-          const isApplied = appliedCampaignIds.includes(campaign.id);
-          const isSaved = savedCampaignIds.includes(campaign.id);
-          
-          return (
-            <Card key={campaign.id} style={styles.campaignCard} elevation={2}>
-              <View style={styles.campaignContent}>
-                <View style={styles.campaignInfo}>
-                  <View style={styles.campaignHeader}>
-                    <Text variant="titleMedium" style={styles.campaignTitle}>
-                      {campaign.brand}
-                    </Text>
-                    <Button
-                      mode="text"
-                      onPress={() => handleSaveCampaign(campaign.id)}
-                      style={styles.saveButton}
-                      labelStyle={styles.saveButtonLabel}
-                      icon={isSaved ? 'bookmark' : 'bookmark-outline'}
-                    >
-                      {isSaved ? 'Saved ✓' : 'Save'}
-                    </Button>
-                  </View>
-                  <Text variant="bodyMedium" style={styles.campaignDescription}>
-                    {campaign.title}
-                  </Text>
-                  <View style={styles.campaignMeta}>
-                    <View style={styles.budgetContainer}>
-                      <MaterialCommunityIcons 
-                        name="currency-usd" 
-                        size={16} 
-                        color={colors.success} 
-                      />
-                      <Text variant="bodySmall" style={styles.budgetText}>
-                        ${campaign.budgetUSD}
-                      </Text>
-                    </View>
-                    <Text variant="bodySmall" style={styles.deadlineText}>
-                      Deadline: {new Date(campaign.deadlineISO).toLocaleDateString()}
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.campaignActions}>
-                  <Button 
-                    mode={isApplied ? "outlined" : "contained"}
-                    style={[styles.applyButton, isApplied && styles.appliedButton]}
-                    labelStyle={[styles.applyButtonText, isApplied && styles.appliedButtonText]}
-                    onPress={() => handleApplyToCampaign(campaign)}
-                    disabled={isApplied}
-                    icon={isApplied ? 'check' : 'send'}
-                  >
-                    {isApplied ? 'Applied ✓' : 'Apply Now'}
-                  </Button>
-                </View>
-              </View>
-            </Card>
-          );
-        })}
-
-        {/* Bottom spacing */}
-        <View style={styles.bottomSpacing} />
-      </ScrollView>
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={3}
+        windowSize={5}
+        initialNumToRender={3}
+      />
+      
+      {/* Enhanced Animated Success Message */}
+      <AnimatedSuccessMessage
+        visible={showSuccess}
+        message={successMessage}
+        onDismiss={dismissSuccess}
+        icon={successMessage.includes('💡') ? 'lightbulb' : 
+              successMessage.includes('🚀') ? 'rocket-launch' :
+              successMessage.includes('📌') ? 'bookmark' :
+              'check-circle'}
+      />
       
       <LoadingOverlay 
         visible={loading} 
@@ -477,25 +461,6 @@ const styles = StyleSheet.create({
   saveTipLabel: {
     fontSize: 14,
   },
-  successCard: {
-    backgroundColor: colors.success + '15',
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.md,
-    borderRadius: radius.md,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.success,
-  },
-  successContent: {
-    padding: spacing.md,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  successText: {
-    color: colors.success,
-    marginLeft: spacing.sm,
-    fontWeight: '500',
-    flex: 1,
-  },
   campaignHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -517,76 +482,5 @@ const styles = StyleSheet.create({
   },
   appliedButtonText: {
     color: colors.success,
-  },
-  successCard: {
-    backgroundColor: colors.surface,
-    marginHorizontal: spacing.md,
-    marginVertical: spacing.sm,
-    borderRadius: radius.md,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.success,
-    ...shadow.sm,
-  },
-  successContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: spacing.md,
-  },
-  successText: {
-    color: colors.textPrimary,
-    marginLeft: spacing.sm,
-    fontWeight: '600',
-    flex: 1,
-  },
-  testCard: {
-    backgroundColor: colors.surface,
-    marginHorizontal: spacing.md,
-    marginBottom: spacing.lg,
-    borderRadius: radius.md,
-    borderLeftWidth: 4,
-    borderLeftColor: colors.secondary,
-    ...shadow.sm,
-  },
-  testContent: {
-    padding: spacing.md,
-  },
-  testTitle: {
-    color: colors.textPrimary,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  testSubtitle: {
-    color: colors.textSecondary,
-    marginBottom: spacing.md,
-  },
-  testButtons: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  testButton: {
-    flex: 1,
-    borderColor: colors.secondary,
-  },
-  testInfo: {
-    color: colors.textSecondary,
-    fontStyle: 'italic',
-    textAlign: 'center',
-  },
-  autoSaveContainer: {
-    marginBottom: spacing.md,
-    alignItems: 'center',
-  },
-  autoSaveButton: {
-    borderColor: colors.secondary,
-    minWidth: 150,
-  },
-  autoSaveEnabled: {
-    backgroundColor: colors.success,
-    borderColor: colors.success,
-  },
-  autoSaveStatus: {
-    marginTop: spacing.xs,
-    fontWeight: '600',
   },
 });

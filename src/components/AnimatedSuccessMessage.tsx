@@ -4,7 +4,7 @@ import { Card, Text } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../theme/colors';
 import { spacing, radius } from '../theme/tokens';
-import { createSuccessAnimation, createFadeAnimation, ANIMATION_DURATION } from '../utils/animations';
+import { createSuccessAnimation, createFadeAnimation, ANIMATION_DURATION, EASING } from '../utils/animations';
 
 interface AnimatedSuccessMessageProps {
   message: string;
@@ -22,6 +22,8 @@ export default function AnimatedSuccessMessage({
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const slideAnim = useRef(new Animated.Value(-50)).current;
+  const bounceAnim = useRef(new Animated.Value(0)).current;
+  const iconRotateAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     if (visible) {
@@ -30,19 +32,43 @@ export default function AnimatedSuccessMessage({
       fadeAnim.setValue(0);
       slideAnim.setValue(-50);
 
-      // Start entrance animation
-      Animated.parallel([
-        createFadeAnimation(fadeAnim, 1, ANIMATION_DURATION.FAST),
-        Animated.timing(slideAnim, {
-          toValue: 0,
-          duration: ANIMATION_DURATION.NORMAL,
+      // Enhanced entrance animation
+      Animated.sequence([
+        // Slide and fade in
+        Animated.parallel([
+          createFadeAnimation(fadeAnim, 1, ANIMATION_DURATION.NORMAL),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: ANIMATION_DURATION.NORMAL,
+            easing: EASING.EASE_OUT,
+            useNativeDriver: true,
+          }),
+        ]),
+        // Bounce scale effect
+        Animated.timing(scaleAnim, {
+          toValue: 1.1,
+          duration: ANIMATION_DURATION.FAST,
+          easing: EASING.BOUNCE,
           useNativeDriver: true,
         }),
-        Animated.sequence([
-          Animated.delay(100),
-          Animated.timing(scaleAnim, {
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATION.FAST,
+          easing: EASING.EASE_OUT,
+          useNativeDriver: true,
+        }),
+        // Icon rotation and gentle bounce
+        Animated.parallel([
+          Animated.timing(iconRotateAnim, {
+            toValue: 1,
+            duration: ANIMATION_DURATION.SLOW,
+            easing: EASING.EASE_OUT,
+            useNativeDriver: true,
+          }),
+          Animated.timing(bounceAnim, {
             toValue: 1,
             duration: ANIMATION_DURATION.NORMAL,
+            easing: EASING.EASE_IN_OUT,
             useNativeDriver: true,
           }),
         ]),
@@ -85,13 +111,32 @@ export default function AnimatedSuccessMessage({
       ]}
     >
       <Card style={styles.card} elevation={8}>
-        <Animated.View style={styles.content}>
-          <MaterialCommunityIcons
-            name={icon}
-            size={24}
-            color={colors.success}
-            style={styles.icon}
-          />
+        <Animated.View style={[
+          styles.content,
+          {
+            transform: [{
+              scale: bounceAnim.interpolate({
+                inputRange: [0, 0.5, 1],
+                outputRange: [1, 1.02, 1]
+              })
+            }]
+          }
+        ]}>
+          <Animated.View style={{
+            transform: [{
+              rotate: iconRotateAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: ['0deg', '360deg']
+              })
+            }],
+            marginRight: spacing.sm
+          }}>
+            <MaterialCommunityIcons
+              name={icon}
+              size={24}
+              color={colors.success}
+            />
+          </Animated.View>
           <Text variant="bodyMedium" style={styles.message}>
             {message}
           </Text>

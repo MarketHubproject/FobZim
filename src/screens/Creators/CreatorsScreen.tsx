@@ -1,21 +1,111 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, FlatList, RefreshControl } from 'react-native';
-import { Text, Searchbar, Chip, Menu, Button, Divider } from 'react-native-paper';
+import React, { useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, FlatList, RefreshControl, Animated, Dimensions } from 'react-native';
+import { Text, Searchbar, Chip, Menu, Button, FAB } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { colors } from '../../theme/colors';
-import { spacing, radius } from '../../theme/tokens';
+import { spacing, radius, shadow } from '../../theme/tokens';
+import { createFadeAnimation, createStaggerAnimation, ANIMATION_DURATION, EASING } from '../../utils/animations';
 import { useEnhancedSearch, useSearchSuggestions } from '../../hooks/useEnhancedSearch';
 import { mockCreators } from '../../data/mockData';
 import { Creator } from '../../data/types';
 import CreatorCard from '../../components/CreatorCard';
 import SectionHeader from '../../components/SectionHeader';
+import AnimatedSuccessMessage from '../../components/AnimatedSuccessMessage';
+import { SearchResultsSkeleton, StatsBarSkeleton } from '../../components/SkeletonLoaders';
+import { SwipeableCard, DoubleTapHandler } from '../../components/GestureInteractions';
 import CreatorProfileScreen from './CreatorProfileScreen';
+
+const { width: screenWidth } = Dimensions.get('window');
+
+interface AnimatedCreatorCardProps {
+  creator: Creator;
+  onPress: (creator: Creator) => void;
+  index: number;
+  showSuccessToast: (message: string) => void;
+}
+
+const AnimatedCreatorCard = ({ creator, onPress, index, showSuccessToast }: AnimatedCreatorCardProps) => {
+  const scaleAnim = useRef(new Animated.Value(0)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const { savedCreatorIds, toggleSaveCreator, followCreator } = useAppStore();
+  
+  const isSaved = savedCreatorIds?.includes(creator.id) || false;
+  
+  useEffect(() => {
+    // Staggered entrance animation
+    const delay = index * 100;
+    setTimeout(() => {
+      Animated.parallel([
+        createFadeAnimation(fadeAnim, 1, ANIMATION_DURATION.NORMAL),
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: ANIMATION_DURATION.NORMAL,
+          easing: EASING.EASE_OUT,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, delay);
+  }, [index]);
+  
+  const handleSaveCreator = () => {
+    toggleSaveCreator?.(creator.id);
+    showSuccessToast(isSaved ? `❤️ Unfavorited ${creator.name}` : `❤️ Favorited ${creator.name}!`);
+  };
+  
+  const handleFollowCreator = () => {
+    followCreator?.(creator.id);
+    showSuccessToast(`🚀 Following ${creator.name}!`);
+  };
+  
+  return (
+    <Animated.View style={[
+      styles.animatedCardContainer,
+      {
+        opacity: fadeAnim,
+        transform: [{ scale: scaleAnim }]
+      }
+    ]}>
+      <SwipeableCard
+        leftAction={{
+          icon: isSaved ? 'heart-off' : 'heart',
+          color: colors.error,
+          label: isSaved ? 'Unfavorite' : 'Favorite'
+        }}
+        rightAction={{
+          icon: 'account-plus',
+          color: colors.primary,
+          label: 'Follow'
+        }}
+        onSwipeLeft={handleSaveCreator}
+        onSwipeRight={handleFollowCreator}
+      >
+        <DoubleTapHandler
+          onDoubleTap={handleSaveCreator}
+          onSingleTap={() => onPress(creator)}
+        >
+          <CreatorCard 
+            creator={creator} 
+            onPress={() => {}} // Handled by DoubleTapHandler
+          />
+        </DoubleTapHandler>
+      </SwipeableCard>
+    </Animated.View>
+  );
+};
 
 export default function CreatorsScreen() {
   const [refreshing, setRefreshing] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(true);
   const [showFilters, setShowFilters] = useState(false);
   const [showSortMenu, setShowSortMenu] = useState(false);
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [showSuccess, setShowSuccess] = useState(false);
+  
+  // Animation values
+  const headerAnim = useRef(new Animated.Value(0)).current;
+  const statsAnim = useRef(new Animated.Value(0)).current;
+  const filtersAnim = useRef(new Animated.Value(0)).current;
   
   // Enhanced search hook
   const {
@@ -31,6 +121,34 @@ export default function CreatorsScreen() {
     ['name', 'bio', 'niche', 'location'],
     { debounceMs: 300, maxResults: 100 }
   );
+  
+  // Initialize animations
+  useEffect(() => {
+    // Staggered entrance animations
+    Animated.sequence([
+      createFadeAnimation(headerAnim, 1, ANIMATION_DURATION.NORMAL),
+      Animated.delay(200),
+      Animated.timing(statsAnim, {
+        toValue: 1,
+        duration: ANIMATION_DURATION.NORMAL,
+        easing: EASING.EASE_OUT,
+        useNativeDriver: true,
+      }),
+      Animated.delay(100),
+      createFadeAnimation(filtersAnim, 1, ANIMATION_DURATION.NORMAL),
+    ]).start();
+  }, []);
+  
+  // Simulate initial data loading
+  useEffect(() => {
+    const loadCreators = async () => {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1800));
+      setInitialLoading(false);
+    };
+    
+    loadCreators();
+  }, []);
   
 
   // Search suggestions
@@ -51,14 +169,27 @@ export default function CreatorsScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simulate API refresh
+    // Simulate API refresh with enhanced feedback
     setTimeout(() => {
       setRefreshing(false);
+      showSuccessToast(`🔄 Found ${searchResults.items.length} creators!`);
     }, 1500);
+  };
+  
+  const showSuccessToast = (message: string) => {
+    setSuccessMessage(message);
+    setShowSuccess(true);
+  };
+  
+  const dismissSuccess = () => {
+    setShowSuccess(false);
+    setSuccessMessage('');
   };
 
   const handleNicheFilter = (niche: string) => {
     updateFilters({ niche: niche === 'All' ? undefined : niche });
+    const action = niche === 'All' ? 'Filter cleared' : `Filtered by ${niche}`;
+    showSuccessToast(`🎨 ${action}`);
   };
 
   const handleFollowerFilter = (range: typeof followerRanges[0]) => {
@@ -66,17 +197,26 @@ export default function CreatorsScreen() {
       minFollowers: range.min === 0 ? undefined : range.min,
       maxFollowers: range.max === Infinity ? undefined : range.max,
     });
+    showSuccessToast(`🔢 Filtered by ${range.label}`);
   };
 
   const handleSortChange = (sortBy: 'relevance' | 'followers' | 'alphabetical') => {
     updateFilters({ sortBy });
     setShowSortMenu(false);
+    const sortLabels = {
+      relevance: 'Relevance',
+      followers: 'Followers',
+      alphabetical: 'Name A-Z'
+    };
+    showSuccessToast(`🔄 Sorted by ${sortLabels[sortBy]}`);
   };
 
-  const renderCreator = ({ item }: { item: Creator }) => (
-    <CreatorCard 
-      creator={item} 
-      onPress={() => setSelectedCreator(item)}
+  const renderCreator = ({ item, index }: { item: Creator; index: number }) => (
+    <AnimatedCreatorCard
+      creator={item}
+      onPress={setSelectedCreator}
+      index={index}
+      showSuccessToast={showSuccessToast}
     />
   );
 
@@ -113,8 +253,8 @@ export default function CreatorsScreen() {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
-      <View style={styles.header}>
+      {/* Animated Header */}
+      <Animated.View style={[styles.header, { opacity: headerAnim }]}>
         <Text variant="headlineMedium" style={styles.title}>
           Zimbabwe Creators 🇿🇼
         </Text>
@@ -122,8 +262,22 @@ export default function CreatorsScreen() {
           Discover {totalCount} amazing content creators
         </Text>
         
-        {/* Quick Stats */}
-        <View style={styles.quickStats}>
+        {/* Animated Quick Stats with Skeleton */}
+        {initialLoading ? (
+          <StatsBarSkeleton />
+        ) : (
+          <Animated.View style={[
+            styles.quickStats,
+            {
+              opacity: statsAnim,
+              transform: [{
+                translateY: statsAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [30, 0]
+                })
+              }]
+            }
+          ]}>
           <View style={styles.statItem}>
             <Text variant="titleMedium" style={styles.statNumber}>{totalCount}</Text>
             <Text variant="bodySmall" style={styles.statLabel}>Total Creators</Text>
@@ -144,11 +298,12 @@ export default function CreatorsScreen() {
               {query ? 'Results' : 'Categories'}
             </Text>
           </View>
-        </View>
-      </View>
+          </Animated.View>
+        )}
+      </Animated.View>
 
-      {/* Search Bar */}
-      <View style={styles.searchContainer}>
+      {/* Animated Search Bar */}
+      <Animated.View style={[styles.searchContainer, { opacity: filtersAnim }]}>
         <Searchbar
           placeholder="Search creators, niches..."
           onChangeText={updateQuery}
@@ -181,13 +336,25 @@ export default function CreatorsScreen() {
             />
           </View>
         )}
-      </View>
+      </Animated.View>
 
-      {/* Filter Controls */}
-      <View style={styles.filtersContainer}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {/* Niche Filter */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipContainer}>
+      {/* Animated Filter Controls */}
+      <Animated.View style={[
+        styles.filtersContainer,
+        {
+          opacity: filtersAnim,
+          transform: [{
+            translateY: filtersAnim.interpolate({
+              inputRange: [0, 1],
+              outputRange: [20, 0]
+            })
+          }]
+        }
+      ]}>
+        {/* Niche Filter - ScrollView Solution */}
+        <View style={styles.chipContainer}>
+          <Text style={styles.filterSectionTitle}>Filter by Category:</Text>
+          <View style={styles.chipsWrapper}>
             {availableNiches.map((niche) => (
               <Chip
                 key={niche}
@@ -205,8 +372,8 @@ export default function CreatorsScreen() {
                 {niche}
               </Chip>
             ))}
-          </ScrollView>
-        </ScrollView>
+          </View>
+        </View>
 
         {/* Sort and Filter Actions */}
         <View style={styles.actionsContainer}>
@@ -242,7 +409,7 @@ export default function CreatorsScreen() {
             </Button>
           )}
         </View>
-      </View>
+      </Animated.View>
 
       {/* Results Header */}
       <SectionHeader 
@@ -250,39 +417,68 @@ export default function CreatorsScreen() {
         subtitle={query ? `Results for "${query}"` : 'Featured Zimbabwe creators'}
       />
 
-      {/* Creators List */}
-      <FlatList
-        data={creators}
-        renderItem={renderCreator}
-        keyExtractor={(item) => item.id}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl 
-            refreshing={refreshing} 
-            onRefresh={onRefresh}
-            colors={[colors.primary]}
-            tintColor={colors.primary}
-          />
-        }
-        contentContainerStyle={[
-          styles.creatorsList,
-          creators.length === 0 && styles.emptyList
-        ]}
-        ListEmptyComponent={
-          <View style={styles.emptyState}>
-            <MaterialCommunityIcons
-              name="account-search"
-              size={64}
-              color={colors.textSecondary}
+      {/* Creators List with Skeleton Loading */}
+      {initialLoading ? (
+        <View style={styles.creatorsList}>
+          <SearchResultsSkeleton count={4} />
+        </View>
+      ) : (
+        <FlatList
+          data={creators}
+          renderItem={renderCreator}
+          keyExtractor={(item) => item.id}
+          showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl 
+              refreshing={refreshing} 
+              onRefresh={onRefresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
-            <Text variant="titleMedium" style={styles.emptyTitle}>
-              No creators found
-            </Text>
-            <Text variant="bodyMedium" style={styles.emptySubtitle}>
-              Try adjusting your search or filters
-            </Text>
-          </View>
-        }
+          }
+          contentContainerStyle={[
+            styles.creatorsList,
+            creators.length === 0 && styles.emptyList
+          ]}
+          ListEmptyComponent={
+            <View style={styles.emptyState}>
+              <MaterialCommunityIcons
+                name="account-search"
+                size={64}
+                color={colors.textSecondary}
+              />
+              <Text variant="titleMedium" style={styles.emptyTitle}>
+                No creators found
+              </Text>
+              <Text variant="bodyMedium" style={styles.emptySubtitle}>
+                Try adjusting your search or filters
+              </Text>
+            </View>
+          }
+        />
+      )}
+      
+      {/* Enhanced Success Message */}
+      <AnimatedSuccessMessage
+        visible={showSuccess}
+        message={successMessage}
+        onDismiss={dismissSuccess}
+        icon={successMessage.includes('🔄') ? 'reload' :
+              successMessage.includes('🎨') ? 'palette' :
+              successMessage.includes('🔢') ? 'sort-numeric-variant' :
+              'check-circle'}
+      />
+      
+      {/* Floating Action Button for Quick Actions */}
+      <FAB
+        style={styles.fab}
+        icon={showFilters ? 'filter-off' : 'filter'}
+        onPress={() => {
+          setShowFilters(!showFilters);
+          showSuccessToast(showFilters ? '💫 Filters hidden' : '🌊 Filters shown');
+        }}
+        label={showFilters ? 'Hide Filters' : 'Show Filters'}
+        visible={true}
       />
     </View>
   );
@@ -292,6 +488,9 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  animatedCardContainer: {
+    marginVertical: spacing.xs,
   },
   header: {
     padding: spacing.lg,
@@ -313,14 +512,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
     backgroundColor: colors.surface,
-    borderRadius: radius.md,
+    borderRadius: radius.lg,
     paddingVertical: spacing.md,
     marginHorizontal: spacing.md,
-    elevation: 1,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
+    ...shadow.md,
   },
   statItem: {
     alignItems: 'center',
@@ -381,6 +576,17 @@ const styles = StyleSheet.create({
   chipContainer: {
     marginBottom: spacing.sm,
   },
+  filterSectionTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.textPrimary,
+    marginBottom: spacing.xs,
+  },
+  chipsWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: spacing.xs,
+  },
   filterChip: {
     marginRight: spacing.sm,
     backgroundColor: colors.surface,
@@ -424,5 +630,11 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     color: colors.textSecondary,
     textAlign: 'center',
+  },
+  fab: {
+    position: 'absolute',
+    bottom: spacing.lg,
+    right: spacing.md,
+    backgroundColor: colors.primary,
   },
 });

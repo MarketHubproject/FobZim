@@ -19,6 +19,8 @@ interface AppState {
   savedTrendIds: string[];
   appliedCampaignIds: string[];
   savedTips: string[];
+  savedCreatorIds: string[];
+  followedCreatorIds: string[];
   
   // Search state
   searchQuery: string;
@@ -47,6 +49,8 @@ interface AppActions {
   markCampaignApplied: (campaignId: string) => void;
   saveTip: (tip: string) => void;
   removeSavedTip: (tip: string) => void;
+  toggleSaveCreator: (creatorId: string) => void;
+  followCreator: (creatorId: string) => void;
   
   // Search actions
   setSearchQuery: (query: string) => void;
@@ -94,6 +98,8 @@ const initialState: AppState = {
   savedTrendIds: [],
   appliedCampaignIds: [],
   savedTips: [],
+  savedCreatorIds: [],
+  followedCreatorIds: [],
   searchQuery: '',
   searchHistory: [],
   isHydrated: true,
@@ -225,6 +231,31 @@ export const useAppStore = create<AppStore>()((set, get) => ({
     }));
     // Track analytics
     analyticsManager.trackAction('tip_removed', { tip });
+    triggerAutoSave(get);
+  },
+
+  toggleSaveCreator: (creatorId) => {
+    set((state) => {
+      const isCurrentlySaved = state.savedCreatorIds.includes(creatorId);
+      return {
+        savedCreatorIds: isCurrentlySaved
+          ? state.savedCreatorIds.filter((id) => id !== creatorId)
+          : [...state.savedCreatorIds, creatorId],
+      };
+    });
+    // Track analytics
+    analyticsManager.trackAction('creator_saved', { creatorId });
+    triggerAutoSave(get);
+  },
+
+  followCreator: (creatorId) => {
+    set((state) => ({
+      followedCreatorIds: state.followedCreatorIds.includes(creatorId)
+        ? state.followedCreatorIds
+        : [...state.followedCreatorIds, creatorId],
+    }));
+    // Track analytics
+    analyticsManager.trackAction('creator_followed', { creatorId });
     triggerAutoSave(get);
   },
 

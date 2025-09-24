@@ -48,21 +48,13 @@ function CampaignsScreen() {
   return <EnhancedCampaignsScreen />;
 }
 
-// Simple Messages Screen
+// Import Enhanced Messages Screen
+import EnhancedMessagesScreen from './src/screens/EnhancedMessagesScreen';
+
+// Simple Messages Screen (now using enhanced version)
 function MessagesScreen() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Appbar.Header style={{ backgroundColor: colors.primary }}>
-        <Appbar.Content title="Messages" titleStyle={{ color: colors.white }} />
-      </Appbar.Header>
-      
-      <View style={styles.centerContent}>
-        <MaterialCommunityIcons name="message" size={64} color={colors.primary} />
-        <Text style={styles.title}>Messages</Text>
-        <Text style={styles.subtitle}>Connect with other creators and brands</Text>
-      </View>
-    </SafeAreaView>
-  );
+  console.log('💬 MessagesScreen rendering...');
+  return <EnhancedMessagesScreen />;
 }
 
 // Simple Profile Screen

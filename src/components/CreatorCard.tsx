@@ -1,8 +1,9 @@
-import React from 'react';
-import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef, useEffect, useState } from 'react';
+import { View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { Text, Card, Chip } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
+import { createButtonPressAnimation, createFadeAnimation, ANIMATION_DURATION } from '../utils/animations';
 
 import { Creator } from '../data/types';
 import { colors } from '../theme/colors';
@@ -15,6 +16,48 @@ interface CreatorCardProps {
 }
 
 export default function CreatorCard({ creator, onPress, compact = false }: CreatorCardProps) {
+  // Animation values
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const spotlightPulse = useRef(new Animated.Value(1)).current;
+  const [isPressed, setIsPressed] = useState(false);
+  
+  // Animation handlers
+  const { pressIn, pressOut } = createButtonPressAnimation(scaleAnim, onPress);
+  
+  // Mount animation
+  useEffect(() => {
+    createFadeAnimation(fadeAnim, 1, ANIMATION_DURATION.NORMAL).start();
+    
+    // Spotlight pulse animation
+    if (creator.spotlight) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(spotlightPulse, {
+            toValue: 1.1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(spotlightPulse, {
+            toValue: 1,
+            duration: 1000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [creator.spotlight]);
+  
+  const handlePressIn = () => {
+    setIsPressed(true);
+    pressIn();
+  };
+  
+  const handlePressOut = () => {
+    setIsPressed(false);
+    pressOut();
+  };
+
   const formatFollowers = (count: number): string => {
     if (count >= 1000000) {
       return `${(count / 1000000).toFixed(1)}M`;
@@ -47,27 +90,48 @@ export default function CreatorCard({ creator, onPress, compact = false }: Creat
   };
 
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.7}>
-      <Card style={[styles.card, compact && styles.compactCard]} elevation={3}>
-        <View style={styles.cardContent}>
-          {/* Avatar and Spotlight Badge */}
-          <View style={styles.avatarContainer}>
-            <Image
-              source={{ uri: creator.avatar }}
-              style={styles.avatar}
-              contentFit="cover"
-              placeholder="👤"
-            />
-            {creator.spotlight && (
-              <View style={styles.spotlightBadge}>
-                <MaterialCommunityIcons 
-                  name="star" 
-                  size={12} 
-                  color={colors.white} 
+    <Animated.View 
+      style={[{
+        opacity: fadeAnim,
+        transform: [{ scale: scaleAnim }]
+      }]}
+    >
+      <TouchableOpacity 
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        activeOpacity={1}
+      >
+        <Card style={[
+          styles.card, 
+          compact && styles.compactCard,
+          isPressed && styles.pressedCard
+        ]} elevation={isPressed ? 6 : 3}>
+          <View style={styles.cardContent}>
+            {/* Avatar and Spotlight Badge */}
+            <View style={styles.avatarContainer}>
+              <Animated.View style={[styles.avatarWrapper, {
+                transform: [{ scale: spotlightPulse }]
+              }]}>
+                <Image
+                  source={{ uri: creator.avatar }}
+                  style={styles.avatar}
+                  contentFit="cover"
+                  placeholder="👤"
                 />
-              </View>
-            )}
-          </View>
+              </Animated.View>
+              {creator.spotlight && (
+                <Animated.View style={[
+                  styles.spotlightBadge,
+                  { transform: [{ scale: spotlightPulse }] }
+                ]}>
+                  <MaterialCommunityIcons 
+                    name="star" 
+                    size={12} 
+                    color={colors.white} 
+                  />
+                </Animated.View>
+              )}
+            </View>
 
           {/* Creator Info */}
           <View style={styles.infoContainer}>
@@ -160,6 +224,7 @@ export default function CreatorCard({ creator, onPress, compact = false }: Creat
         </View>
       </Card>
     </TouchableOpacity>
+    </Animated.View>
   );
 }
 
@@ -170,9 +235,17 @@ const styles = StyleSheet.create({
     marginVertical: spacing.xs,
     borderRadius: radius.md,
     ...shadow.md,
+    transition: 'all 0.2s ease',
+  },
+  pressedCard: {
+    backgroundColor: colors.surface,
+    transform: [{ scale: 0.98 }],
   },
   compactCard: {
     width: 280,
+  },
+  avatarWrapper: {
+    borderRadius: radius.full,
   },
   cardContent: {
     padding: spacing.md,

@@ -1,0 +1,184 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+        exists(/databases/(default)/documents/admins/$(request.auth.uid));
+    }
+    
+    function hasValidUserProfile() {
+      return isAuthenticated() && 
+        exists(/databases/(default)/documents/users/$(request.auth.uid));
+    }
+    
+    function isValidImageFile() {
+      return request.resource.contentType.matches('image/.*') &&
+             request.resource.size < 10 * 1024 * 1024; // 10MB limit
+    }
+    
+    function isValidVideoFile() {
+      return request.resource.contentType.matches('video/.*') &&
+             request.resource.size < 100 * 1024 * 1024; // 100MB limit
+    }
+    
+    function isValidDocumentFile() {
+      return (request.resource.contentType.matches('application/pdf') ||
+              request.resource.contentType.matches('application/msword') ||
+              request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.wordprocessingml.document') ||
+              request.resource.contentType.matches('text/plain')) &&
+             request.resource.size < 50 * 1024 * 1024; // 50MB limit
+    }
+
+    // User profile images
+    match /profiles/{userId}/{allPaths=**} {
+      // Users can read all profile images (public)
+      allow read: if true;
+      
+      // Users can upload/update their own profile images
+      allow write: if isOwner(userId) && 
+                     hasValidUserProfile() &&
+                     isValidImageFile();
+      
+      // Admins can manage all profile images
+      allow write: if isAdmin();
+    }
+
+    // Campaign images and media
+    match /campaigns/{campaignId}/{allPaths=**} {
+      // Anyone can read campaign media (campaigns might be public)
+      allow read: if true;
+      
+      // Campaign creators and moderators can upload media
+      allow write: if isAuthenticated() && 
+                     hasValidUserProfile() &&
+                     (isValidImageFile() || isValidVideoFile()) &&
+                     (exists(/databases/(default)/documents/campaigns/$(campaignId)) &&
+                      (resource.data.createdBy == request.auth.uid ||
+                       request.auth.uid in resource.data.moderators));
+      
+      // Admins can manage all campaign media
+      allow write: if isAdmin();
+    }
+
+    // Message attachments
+    match /messages/{conversationId}/{messageId}/{allPaths=**} {
+      // Conversation participants can read message attachments
+      allow read: if isAuthenticated() &&
+                    exists(/databases/(default)/documents/conversations/$(conversationId)) &&
+                    request.auth.uid in resource.data.participants;
+      
+      // Conversation participants can upload attachments
+      allow write: if isAuthenticated() && 
+                     hasValidUserProfile() &&
+                     (isValidImageFile() || isValidVideoFile() || isValidDocumentFile()) &&
+                     exists(/databases/(default)/documents/conversations/$(conversationId)) &&
+                     request.auth.uid in resource.data.participants;
+      
+      // Admins can manage all message attachments
+      allow write: if isAdmin();
+    }
+
+    // Contribution documents and proofs
+    match /contributions/{contributionId}/{allPaths=**} {
+      // Contributors can read their own contribution files
+      allow read: if isAuthenticated() &&
+                    exists(/databases/(default)/documents/contributions/$(contributionId)) &&
+                    resource.data.contributorId == request.auth.uid;
+      
+      // Campaign owners can read contribution files for their campaigns
+      allow read: if isAuthenticated() &&
+                    exists(/databases/(default)/documents/contributions/$(contributionId)) &&
+                    exists(/databases/(default)/documents/campaigns/$(resource.data.campaignId)) &&
+                    get(/databases/(default)/documents/campaigns/$(resource.data.campaignId)).data.createdBy == request.auth.uid;
+      
+      // Contributors can upload their contribution files
+      allow write: if isAuthenticated() && 
+                     hasValidUserProfile() &&
+                     (isValidImageFile() || isValidVideoFile() || isValidDocumentFile()) &&
+                     exists(/databases/(default)/documents/contributions/$(contributionId)) &&
+                     resource.data.contributorId == request.auth.uid;
+      
+      // Admins can manage all contribution files
+      allow read, write: if isAdmin();
+    }
+
+    // Public assets (logos, banners, etc.)
+    match /public/{allPaths=**} {
+      // Anyone can read public assets
+      allow read: if true;
+      
+      // Only admins can manage public assets
+      allow write: if isAdmin();
+    }
+
+    // Temporary uploads (for processing before moving to final location)
+    match /temp/{userId}/{allPaths=**} {
+      // Users can manage their own temporary files
+      allow read, write: if isOwner(userId) && 
+                           hasValidUserProfile() &&
+                           (isValidImageFile() || isValidVideoFile() || isValidDocumentFile());
+      
+      // Admins can manage all temporary files
+      allow read, write: if isAdmin();
+    }
+
+    // Creator verification documents
+    match /verification/{userId}/{allPaths=**} {
+      // Users can read their own verification documents
+      allow read: if isOwner(userId);
+      
+      // Users can upload their own verification documents
+      allow write: if isOwner(userId) && 
+                     hasValidUserProfile() &&
+                     (isValidImageFile() || isValidDocumentFile());
+      
+      // Admins can read all verification documents for approval
+      allow read, write: if isAdmin();
+    }
+
+    // Report attachments
+    match /reports/{reportId}/{allPaths=**} {
+      // Report creators can read their own report attachments
+      allow read: if isAuthenticated() &&
+                    exists(/databases/(default)/documents/reports/$(reportId)) &&
+                    resource.data.reportedBy == request.auth.uid;
+      
+      // Users can upload attachments for their reports
+      allow write: if isAuthenticated() && 
+                     hasValidUserProfile() &&
+                     isValidImageFile() &&
+                     exists(/databases/(default)/documents/reports/$(reportId)) &&
+                     resource.data.reportedBy == request.auth.uid;
+      
+      // Admins can read all report attachments
+      allow read, write: if isAdmin();
+    }
+
+    // Analytics data exports (CSV, JSON, etc.)
+    match /analytics/{allPaths=**} {
+      // Only admins can access analytics data
+      allow read, write: if isAdmin();
+    }
+
+    // Backups
+    match /backups/{allPaths=**} {
+      // Only admins can access backup files
+      allow read, write: if isAdmin();
+    }
+
+    // Block all other access
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
