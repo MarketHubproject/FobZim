@@ -21,13 +21,58 @@ const colors = {
   border: '#E5E7EB',
 };
 
-// Import Enhanced Home Screen
-import EnhancedHomeScreen from './src/screens/EnhancedHomeScreen';
-
-// Simple Home Screen (now using enhanced version)
+// Simple Home Screen
 function HomeScreen() {
   console.log('🏠 HomeScreen rendering...');
-  return <EnhancedHomeScreen />;
+  
+  return (
+    <SafeAreaView style={styles.container}>
+      <Appbar.Header style={{ backgroundColor: colors.primary }}>
+        <Appbar.Content title="FobZim" titleStyle={{ color: colors.white }} />
+      </Appbar.Header>
+      
+      <ScrollView style={styles.content} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.welcomeSection}>
+          <Text style={styles.greeting}>Welcome to FobZim! 🇿🇼</Text>
+          <Text style={styles.subtitle}>Discover Zimbabwe's rising content creators</Text>
+        </View>
+        
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.cardTitle}>Featured Campaign</Text>
+            <Text style={styles.cardText}>
+              Join our Zimbabwe Tourism Campaign and showcase the beauty of our country!
+            </Text>
+            <Button 
+              mode="contained" 
+              style={styles.button}
+              buttonColor={colors.primary}
+              onPress={() => console.log('Apply pressed')}
+            >
+              Apply Now
+            </Button>
+          </Card.Content>
+        </Card>
+
+        <Card style={styles.card}>
+          <Card.Content>
+            <Text style={styles.cardTitle}>Trending Creators</Text>
+            <Text style={styles.cardText}>
+              Check out the most popular creators from Zimbabwe making waves in social media.
+            </Text>
+            <Button 
+              mode="outlined" 
+              style={styles.button}
+              textColor={colors.primary}
+              onPress={() => console.log('Explore pressed')}
+            >
+              Explore Creators
+            </Button>
+          </Card.Content>
+        </Card>
+      </ScrollView>
+    </SafeAreaView>
+  );
 }
 
 // Simple Creators Screen
