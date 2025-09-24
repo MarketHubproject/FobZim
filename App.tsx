@@ -30,21 +30,13 @@ function HomeScreen() {
   return <EnhancedHomeScreen />;
 }
 
-// Simple Creators Screen
+// Import Enhanced Creators Screen
+import EnhancedCreatorsScreen from './src/screens/EnhancedCreatorsScreen';
+
+// Simple Creators Screen (now using enhanced version)
 function CreatorsScreen() {
-  return (
-    <SafeAreaView style={styles.container}>
-      <Appbar.Header style={{ backgroundColor: colors.primary }}>
-        <Appbar.Content title="Creators" titleStyle={{ color: colors.white }} />
-      </Appbar.Header>
-      
-      <View style={styles.centerContent}>
-        <MaterialCommunityIcons name="account-star" size={64} color={colors.primary} />
-        <Text style={styles.title}>Creators Hub</Text>
-        <Text style={styles.subtitle}>Discover talented creators from Zimbabwe</Text>
-      </View>
-    </SafeAreaView>
-  );
+  console.log('🎆 CreatorsScreen rendering...');
+  return <EnhancedCreatorsScreen />;
 }
 
 // Simple Campaigns Screen
