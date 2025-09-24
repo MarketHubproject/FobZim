@@ -331,103 +331,16 @@ const statsData = [
   { label: 'Profile Views', value: userPerformance.profileViews > 1000 ? `${(userPerformance.profileViews / 1000).toFixed(1)}K` : userPerformance.profileViews.toString(), icon: 'eye', color: colors.primary, trend: '+12% this week' },
 ];
 
-// Navigation prop type (in a real app, this would come from React Navigation)
-interface HomeScreenProps {
-  navigation?: {
-    navigate: (screen: string, params?: any) => void;
-    push: (screen: string, params?: any) => void;
-  };
-}
-
-export default function EnhancedHomeScreen({ navigation }: HomeScreenProps = {}) {
+export default function EnhancedHomeScreen() {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [savedCampaigns, setSavedCampaigns] = useState<string[]>([]);
   const [followedCreators, setFollowedCreators] = useState<string[]>([]);
   const [showAllActivity, setShowAllActivity] = useState(false);
   const [activeTab, setActiveTab] = useState('featured'); // featured, recommendations, activity
-  const [notifications, setNotifications] = useState<any[]>([]);
-  const [unreadNotifications, setUnreadNotifications] = useState(3);
-  const [showNotifications, setShowNotifications] = useState(false);
-  const [showQuickActions, setShowQuickActions] = useState(false);
-  const [isFirstVisit, setIsFirstVisit] = useState(false); // Set to true to show onboarding
 
-  const categories = ['All', 'Travel', 'Fashion', 'Food', 'Technology', 'Culture', 'Lifestyle'];
+  const categories = ['All', 'Fashion', 'Lifestyle', 'Travel', 'Food', 'Tech'];
   const todaysTip = dailyTips[Math.floor(Math.random() * dailyTips.length)];
-  
-  // Mock notifications data
-  const mockNotifications = [
-    {
-      id: 'notif_1',
-      title: 'Application Accepted! 🎉',
-      message: 'Your application for Zimbabwe Tourism Campaign has been accepted',
-      timestamp: '2 hours ago',
-      type: 'application_accepted',
-      read: false,
-      actionData: { campaignId: '1', campaignTitle: 'Victoria Falls Experience' }
-    },
-    {
-      id: 'notif_2', 
-      title: 'New Campaign Match',
-      message: 'Zimbabwe Wildlife Conservation - 95% match for your profile',
-      timestamp: '1 day ago',
-      type: 'campaign_match',
-      read: false,
-      actionData: { campaignId: 'new_1', matchScore: 95 }
-    },
-    {
-      id: 'notif_3',
-      title: 'Payment Processed',
-      message: 'Payment of $600 from Victoria Falls campaign has been processed',
-      timestamp: '2 days ago', 
-      type: 'payment',
-      read: true,
-      actionData: { amount: 600, campaignTitle: 'Victoria Falls Experience' }
-    },
-    {
-      id: 'notif_4',
-      title: 'New Follower Milestone',
-      message: 'You\'ve reached 25,500 followers! Time to celebrate 🎊',
-      timestamp: '3 days ago',
-      type: 'milestone',
-      read: true,
-      actionData: { milestone: '25.5K followers' }
-    },
-    {
-      id: 'notif_5',
-      title: 'Collaboration Request',
-      message: '@nomsa_food wants to collaborate on a food & travel project',
-      timestamp: '1 week ago',
-      type: 'collaboration',
-      read: true,
-      actionData: { creatorId: '4', creatorName: 'Nomsa Dube' }
-    }
-  ];
-
-  // Navigation helper functions
-  const navigateToScreen = (screen: string, params?: any) => {
-    if (navigation?.navigate) {
-      navigation.navigate(screen, params);
-    } else {
-      Alert.alert('Navigation', `Navigate to ${screen} screen${params ? ` with params: ${JSON.stringify(params)}` : ''}`);
-    }
-  };
-  
-  const navigateToCampaign = (campaignId: string) => {
-    navigateToScreen('Campaigns', { campaignId, openDetails: true });
-  };
-  
-  const navigateToCreator = (creatorId: string) => {
-    navigateToScreen('Creators', { creatorId, openProfile: true });
-  };
-  
-  const navigateToProfile = () => {
-    navigateToScreen('Profile');
-  };
-  
-  const navigateToMessages = (conversationId?: string) => {
-    navigateToScreen('Messages', conversationId ? { conversationId } : undefined);
-  };
   
   // Filter campaigns based on application status for personalized experience
   const getFilteredCampaigns = () => {
@@ -468,95 +381,15 @@ export default function EnhancedHomeScreen({ navigation }: HomeScreenProps = {})
     }
   };
 
-  // Enhanced interaction handlers with navigation
-  const handleNotificationPress = (notification: any) => {
-    // Mark as read
-    if (!notification.read) {
-      setUnreadNotifications(prev => Math.max(0, prev - 1));
-    }
-    
-    // Handle different notification types
-    switch (notification.type) {
-      case 'application_accepted':
-      case 'campaign_match':
-        navigateToCampaign(notification.actionData.campaignId);
-        break;
-      case 'collaboration':
-        navigateToCreator(notification.actionData.creatorId);
-        break;
-      case 'payment':
-      case 'milestone':
-        navigateToProfile();
-        break;
-      default:
-        Alert.alert('Notification', notification.message);
-    }
-    
-    setShowNotifications(false);
-  };
-  
-  const handleCategoryFilter = (category: string) => {
-    setSelectedCategory(category);
-    // Scroll to campaigns section or show filtered results
-    Alert.alert('Filter Applied', `Showing ${category} campaigns`);
-  };
-  
-  const handleQuickAction = (action: string) => {
-    setShowQuickActions(false);
-    
-    switch (action) {
-      case 'create_content':
-        Alert.alert('Create Content', 'Content creation feature coming soon!');
-        break;
-      case 'find_campaigns':
-        navigateToScreen('Campaigns');
-        break;
-      case 'connect_creators':
-        navigateToScreen('Creators');
-        break;
-      case 'view_earnings':
-        navigateToProfile();
-        break;
-      case 'edit_profile':
-        navigateToProfile();
-        break;
-      case 'share_profile':
-        handleShare();
-        break;
-    }
-  };
-  
   const handleApplyToCampaign = (campaign: any) => {
-    if (campaign.applicationStatus) {
-      // Show application status details
-      Alert.alert(
-        'Application Status',
-        `Your application for "${campaign.title}" is currently ${campaign.applicationStatus}`,
-        [
-          { text: 'OK' },
-          { text: 'View Details', onPress: () => navigateToCampaign(campaign.id) }
-        ]
-      );
-      return;
-    }
-    
     Alert.alert(
       'Apply to Campaign',
-      `Would you like to apply to "${campaign.title}"?\n\nBudget: ${campaign.budget}\nLocation: ${campaign.location}\nDuration: ${campaign.duration}`,
+      `Would you like to apply to "${campaign.title}"?`,
       [
         { text: 'Cancel', style: 'cancel' },
         { 
-          text: 'View Details', 
-          onPress: () => navigateToCampaign(campaign.id)
-        },
-        { 
-          text: 'Apply Now', 
-          style: 'default',
-          onPress: () => {
-            Alert.alert('Success', 'Application submitted successfully!');
-            // Update local state to show applied status
-            // In a real app, this would make an API call
-          }
+          text: 'Apply', 
+          onPress: () => Alert.alert('Success', 'Application submitted successfully!') 
         },
       ]
     );
@@ -796,154 +629,6 @@ export default function EnhancedHomeScreen({ navigation }: HomeScreenProps = {})
     </Card>
   );
 
-  const renderNotificationsPanel = () => (
-    <Portal>
-      <Modal
-        visible={showNotifications}
-        onDismiss={() => setShowNotifications(false)}
-        contentContainerStyle={styles.notificationModal}
-      >
-        <View style={styles.notificationHeader}>
-          <Text style={styles.notificationTitle}>Notifications</Text>
-          <IconButton
-            icon="close"
-            onPress={() => setShowNotifications(false)}
-          />
-        </View>
-        
-        <ScrollView style={styles.notificationList}>
-          {mockNotifications.map((notification) => (
-            <TouchableOpacity
-              key={notification.id}
-              style={[styles.notificationItem, !notification.read && styles.unreadNotification]}
-              onPress={() => handleNotificationPress(notification)}
-            >
-              <View style={styles.notificationIcon}>
-                <MaterialCommunityIcons
-                  name={
-                    notification.type === 'application_accepted' ? 'check-circle' :
-                    notification.type === 'campaign_match' ? 'target' :
-                    notification.type === 'payment' ? 'cash' :
-                    notification.type === 'milestone' ? 'trophy' :
-                    notification.type === 'collaboration' ? 'handshake' :
-                    'bell'
-                  }
-                  size={24}
-                  color={
-                    notification.type === 'application_accepted' ? colors.success :
-                    notification.type === 'payment' ? colors.success :
-                    notification.type === 'milestone' ? colors.warning :
-                    colors.primary
-                  }
-                />
-              </View>
-              <View style={styles.notificationContent}>
-                <Text style={styles.notificationItemTitle}>{notification.title}</Text>
-                <Text style={styles.notificationMessage}>{notification.message}</Text>
-                <Text style={styles.notificationTimestamp}>{notification.timestamp}</Text>
-              </View>
-              {!notification.read && <View style={styles.unreadDot} />}
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-        
-        <Button
-          mode="outlined"
-          onPress={() => {
-            setUnreadNotifications(0);
-            Alert.alert('Notifications', 'All notifications marked as read');
-          }}
-          style={styles.markAllReadButton}
-        >
-          Mark All as Read
-        </Button>
-      </Modal>
-    </Portal>
-  );
-  
-  const renderQuickActionsPanel = () => (
-    <Portal>
-      <Modal
-        visible={showQuickActions}
-        onDismiss={() => setShowQuickActions(false)}
-        contentContainerStyle={styles.quickActionsModal}
-      >
-        <View style={styles.quickActionsHeader}>
-          <Text style={styles.quickActionsTitle}>Quick Actions</Text>
-          <IconButton
-            icon="close"
-            onPress={() => setShowQuickActions(false)}
-          />
-        </View>
-        
-        <View style={styles.quickActionsGrid}>
-          {[
-            { id: 'create_content', icon: 'plus', label: 'Create Content', color: colors.primary },
-            { id: 'find_campaigns', icon: 'briefcase', label: 'Find Campaigns', color: colors.secondary },
-            { id: 'connect_creators', icon: 'account-group', label: 'Connect', color: colors.accent },
-            { id: 'view_earnings', icon: 'cash', label: 'View Earnings', color: colors.success },
-            { id: 'edit_profile', icon: 'account-edit', label: 'Edit Profile', color: colors.warning },
-            { id: 'share_profile', icon: 'share-variant', label: 'Share Profile', color: colors.primary },
-          ].map((action) => (
-            <TouchableOpacity
-              key={action.id}
-              style={styles.quickActionItem}
-              onPress={() => handleQuickAction(action.id)}
-            >
-              <View style={[styles.quickActionIcon, { backgroundColor: `${action.color}20` }]}>
-                <MaterialCommunityIcons name={action.icon} size={28} color={action.color} />
-              </View>
-              <Text style={styles.quickActionLabel}>{action.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </Modal>
-    </Portal>
-  );
-  
-  const renderCategoryFilters = () => (
-    <View style={styles.categoryFiltersContainer}>
-      <Text style={styles.categoryFiltersTitle}>Browse by Category</Text>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.categoryFiltersScroll}
-      >
-        {categories.map((category) => (
-          <TouchableOpacity
-            key={category}
-            style={[
-              styles.categoryFilterChip,
-              selectedCategory === category && styles.selectedCategoryChip
-            ]}
-            onPress={() => handleCategoryFilter(category)}
-          >
-            <MaterialCommunityIcons
-              name={
-                category === 'Travel' ? 'airplane' :
-                category === 'Fashion' ? 'tshirt-crew' :
-                category === 'Food' ? 'food' :
-                category === 'Technology' ? 'laptop' :
-                category === 'Culture' ? 'bank' :
-                category === 'Lifestyle' ? 'heart' :
-                'apps'
-              }
-              size={18}
-              color={selectedCategory === category ? colors.white : colors.primary}
-              style={styles.categoryFilterIcon}
-            />
-            <Text style={[
-              styles.categoryFilterText,
-              selectedCategory === category && styles.selectedCategoryText
-            ]}>
-              {category}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
-    </View>
-  );
-
   const renderStatsCard = ({ item }: { item: any }) => (
     <Card style={styles.statsCard}>
       <Card.Content style={styles.statsContent}>
@@ -959,31 +644,18 @@ export default function EnhancedHomeScreen({ navigation }: HomeScreenProps = {})
     <SafeAreaView style={styles.container}>
       <Appbar.Header style={styles.header}>
         <Appbar.Content 
-          title="ZimBuzz" 
+          title="FobZim" 
           titleStyle={styles.headerTitle}
         />
         <Appbar.Action 
-          icon="lightning-bolt"
+          icon="bell-outline" 
           iconColor={colors.white}
-          onPress={() => setShowQuickActions(true)}
+          onPress={() => Alert.alert('Notifications', 'You have 3 new notifications')} 
         />
-        <Appbar.Action 
-          icon={unreadNotifications > 0 ? "bell" : "bell-outline"}
-          iconColor={colors.white}
-          onPress={() => setShowNotifications(true)}
-        />
-        {unreadNotifications > 0 && (
-          <Badge 
-            style={styles.notificationBadge} 
-            size={18}
-          >
-            {unreadNotifications > 9 ? '9+' : unreadNotifications}
-          </Badge>
-        )}
         <Appbar.Action 
           icon="account-circle-outline" 
           iconColor={colors.white}
-          onPress={navigateToProfile} 
+          onPress={() => Alert.alert('Profile', 'Navigate to profile')} 
         />
       </Appbar.Header>
 
@@ -1008,15 +680,7 @@ export default function EnhancedHomeScreen({ navigation }: HomeScreenProps = {})
           onChangeText={setSearchQuery}
           style={styles.searchBar}
           inputStyle={styles.searchInput}
-          onSubmitEditing={() => {
-            if (searchQuery.trim()) {
-              navigateToScreen('Campaigns', { searchQuery });
-            }
-          }}
         />
-        
-        {/* Category Filters */}
-        {renderCategoryFilters()}
 
         {/* Personal Stats Section */}
         <View style={styles.sectionHeader}>
@@ -1067,9 +731,9 @@ export default function EnhancedHomeScreen({ navigation }: HomeScreenProps = {})
             {/* Featured Campaigns */}
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Featured Campaigns</Text>
-            <TouchableOpacity onPress={() => navigateToScreen('Campaigns')}>
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={() => Alert.alert('View All', 'Navigate to campaigns screen')}>
+                <Text style={styles.viewAllText}>View All</Text>
+              </TouchableOpacity>
             </View>
 
             <FlatList
@@ -1084,9 +748,9 @@ export default function EnhancedHomeScreen({ navigation }: HomeScreenProps = {})
             {/* Trending Creators */}
             <View style={styles.sectionHeader}>
               <Text style={styles.sectionTitle}>Trending Zimbabwe Creators</Text>
-            <TouchableOpacity onPress={() => navigateToScreen('Creators')}>
-              <Text style={styles.viewAllText}>View All</Text>
-            </TouchableOpacity>
+              <TouchableOpacity onPress={() => Alert.alert('View All', 'Navigate to creators screen')}>
+                <Text style={styles.viewAllText}>View All</Text>
+              </TouchableOpacity>
             </View>
 
             <FlatList
@@ -1140,16 +804,12 @@ export default function EnhancedHomeScreen({ navigation }: HomeScreenProps = {})
         <View style={styles.spacer} />
       </ScrollView>
 
-      {/* Enhanced Floating Action Button with Quick Actions */}
+      {/* Floating Action Button */}
       <FAB
         icon="plus"
         style={styles.fab}
-        onPress={() => setShowQuickActions(true)}
+        onPress={() => Alert.alert('Create', 'Create new campaign or content')}
       />
-      
-      {/* Navigation Modals */}
-      {renderNotificationsPanel()}
-      {renderQuickActionsPanel()}
     </SafeAreaView>
   );
 }
@@ -1678,172 +1338,6 @@ const styles = StyleSheet.create({
   },
   recommendationButtonLabel: {
     fontSize: 12,
-  },
-
-  // Navigation Enhancement Styles
-  notificationBadge: {
-    position: 'absolute',
-    top: 8,
-    right: 52,
-    backgroundColor: colors.error,
-    zIndex: 1,
-  },
-  
-  // Notification Modal Styles
-  notificationModal: {
-    backgroundColor: colors.surface,
-    margin: 20,
-    borderRadius: 12,
-    maxHeight: '80%',
-  },
-  notificationHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  notificationTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-  },
-  notificationList: {
-    maxHeight: 400,
-  },
-  notificationItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  unreadNotification: {
-    backgroundColor: colors.primary + '10',
-  },
-  notificationIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: colors.background,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 12,
-  },
-  notificationContent: {
-    flex: 1,
-  },
-  notificationItemTitle: {
-    fontSize: 14,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-    marginBottom: 4,
-  },
-  notificationMessage: {
-    fontSize: 13,
-    color: colors.textSecondary,
-    lineHeight: 18,
-    marginBottom: 4,
-  },
-  notificationTimestamp: {
-    fontSize: 11,
-    color: colors.muted,
-  },
-  unreadDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: colors.primary,
-    marginTop: 8,
-  },
-  markAllReadButton: {
-    margin: 16,
-  },
-  
-  // Quick Actions Modal Styles
-  quickActionsModal: {
-    backgroundColor: colors.surface,
-    margin: 20,
-    borderRadius: 12,
-  },
-  quickActionsHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  quickActionsTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-  },
-  quickActionsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    padding: 16,
-  },
-  quickActionItem: {
-    width: '33.33%',
-    alignItems: 'center',
-    paddingVertical: 16,
-  },
-  quickActionIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 8,
-  },
-  quickActionLabel: {
-    fontSize: 12,
-    color: colors.textPrimary,
-    textAlign: 'center',
-    fontWeight: '600',
-  },
-  
-  // Category Filters Styles
-  categoryFiltersContainer: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-  },
-  categoryFiltersTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
-    marginBottom: 12,
-  },
-  categoryFiltersScroll: {
-    paddingRight: 16,
-  },
-  categoryFilterChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginRight: 8,
-    borderRadius: 20,
-    backgroundColor: colors.surface,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  selectedCategoryChip: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  categoryFilterIcon: {
-    marginRight: 6,
-  },
-  categoryFilterText: {
-    fontSize: 13,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  selectedCategoryText: {
-    color: colors.white,
   },
 
   spacer: {
