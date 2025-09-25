@@ -591,6 +591,252 @@ const enhancedProfileData = {
     }
   },
   
+  // Advanced Analytics and Insights Data
+  analytics: {
+    overview: {
+      totalEarnings: 12450,
+      totalReach: 850000,
+      averageEngagement: 12.8,
+      campaignsCompleted: 42,
+      profileViews: 15420,
+      followerGrowth: 15.2,
+      responseRate: 98,
+      clientSatisfaction: 4.8
+    },
+    earningsData: {
+      monthlyEarnings: [
+        { month: '2023-06', amount: 850, campaigns: 2 },
+        { month: '2023-07', amount: 1200, campaigns: 3 },
+        { month: '2023-08', amount: 1800, campaigns: 4 },
+        { month: '2023-09', amount: 2200, campaigns: 5 },
+        { month: '2023-10', amount: 2800, campaigns: 6 },
+        { month: '2023-11', amount: 3600, campaigns: 8 }
+      ],
+      revenueByCategory: [
+        { category: 'Travel & Tourism', amount: 4200, percentage: 33.7, campaigns: 12 },
+        { category: 'Fashion & Lifestyle', amount: 3100, percentage: 24.9, campaigns: 10 },
+        { category: 'Food & Culture', amount: 2600, percentage: 20.9, campaigns: 8 },
+        { category: 'Technology', amount: 1550, percentage: 12.4, campaigns: 6 },
+        { category: 'Culture & Heritage', amount: 1000, percentage: 8.0, campaigns: 6 }
+      ],
+      paymentHistory: [
+        {
+          id: 'pay_001',
+          date: '2023-11-20',
+          amount: 1200,
+          campaign: 'Victoria Falls Adventure Campaign',
+          client: 'Zimbabwe Tourism Authority',
+          status: 'completed',
+          paymentMethod: 'bank_transfer'
+        },
+        {
+          id: 'pay_002',
+          date: '2023-11-15',
+          amount: 800,
+          campaign: 'Sustainable Fashion Showcase',
+          client: 'EcoStyle Zimbabwe',
+          status: 'completed',
+          paymentMethod: 'mobile_money'
+        },
+        {
+          id: 'pay_003',
+          date: '2023-11-10',
+          amount: 600,
+          campaign: 'Traditional Cuisine Documentary',
+          client: 'ZimCuisine Co.',
+          status: 'pending',
+          paymentMethod: 'bank_transfer'
+        }
+      ],
+      projectedEarnings: {
+        thisMonth: 4200,
+        nextMonth: 4800,
+        quarterly: 13500,
+        yearly: 52000
+      }
+    },
+    performanceMetrics: {
+      campaignSuccess: [
+        {
+          campaignId: 'camp_001',
+          name: 'Victoria Falls Adventure Campaign',
+          reach: 125000,
+          engagement: 8.5,
+          impressions: 180000,
+          clicks: 15300,
+          conversions: 850,
+          roi: 4.2,
+          rating: 4.9,
+          completionDate: '2023-11-15'
+        },
+        {
+          campaignId: 'camp_002',
+          name: 'Sustainable Fashion Showcase',
+          reach: 85000,
+          engagement: 12.3,
+          impressions: 120000,
+          clicks: 10440,
+          conversions: 520,
+          roi: 3.8,
+          rating: 4.7,
+          completionDate: '2023-10-22'
+        },
+        {
+          campaignId: 'camp_003',
+          name: 'Traditional Cuisine Documentary',
+          reach: 95000,
+          engagement: 15.2,
+          impressions: 140000,
+          clicks: 21280,
+          conversions: 945,
+          roi: 5.1,
+          rating: 4.8,
+          completionDate: '2023-09-18'
+        }
+      ],
+      engagementTrends: [
+        { date: '2023-06-01', likes: 1200, comments: 85, shares: 45, saves: 120 },
+        { date: '2023-07-01', likes: 1450, comments: 102, shares: 58, saves: 145 },
+        { date: '2023-08-01', likes: 1680, comments: 125, shares: 72, saves: 168 },
+        { date: '2023-09-01', likes: 1920, comments: 148, shares: 89, saves: 195 },
+        { date: '2023-10-01', likes: 2180, comments: 172, shares: 105, saves: 225 },
+        { date: '2023-11-01', likes: 2450, comments: 198, shares: 125, saves: 258 }
+      ],
+      audienceInsights: {
+        demographics: {
+          age: {
+            '18-24': 25,
+            '25-34': 45,
+            '35-44': 20,
+            '45-54': 8,
+            '55+': 2
+          },
+          gender: {
+            female: 58,
+            male: 40,
+            other: 2
+          },
+          location: {
+            'Harare': 35,
+            'Bulawayo': 20,
+            'Victoria Falls': 15,
+            'Mutare': 12,
+            'Other Zimbabwe': 10,
+            'International': 8
+          }
+        },
+        interests: [
+          { interest: 'Travel & Tourism', percentage: 68 },
+          { interest: 'Fashion & Style', percentage: 52 },
+          { interest: 'Food & Culture', percentage: 45 },
+          { interest: 'Photography', percentage: 38 },
+          { interest: 'Adventure Sports', percentage: 32 },
+          { interest: 'Cultural Heritage', percentage: 28 }
+        ],
+        activeHours: [
+          { hour: 6, engagement: 15 },
+          { hour: 8, engagement: 35 },
+          { hour: 10, engagement: 45 },
+          { hour: 12, engagement: 65 },
+          { hour: 14, engagement: 55 },
+          { hour: 16, engagement: 48 },
+          { hour: 18, engagement: 78 },
+          { hour: 20, engagement: 85 },
+          { hour: 22, engagement: 42 }
+        ]
+      }
+    },
+    growthTracking: {
+      followerGrowth: [
+        { date: '2023-06-01', followers: 8500, growth: 125 },
+        { date: '2023-07-01', followers: 9800, growth: 1300 },
+        { date: '2023-08-01', followers: 11200, growth: 1400 },
+        { date: '2023-09-01', followers: 12800, growth: 1600 },
+        { date: '2023-10-01', followers: 14100, growth: 1300 },
+        { date: '2023-11-01', followers: 15240, growth: 1140 }
+      ],
+      contentPerformance: {
+        topPosts: [
+          {
+            id: 'post_001',
+            title: 'Victoria Falls Sunset Photography',
+            type: 'image',
+            date: '2023-11-10',
+            likes: 3200,
+            comments: 245,
+            shares: 180,
+            reach: 45000,
+            engagement: 18.5
+          },
+          {
+            id: 'post_002',
+            title: 'Traditional Shona Cuisine Recipe',
+            type: 'video',
+            date: '2023-10-25',
+            likes: 2800,
+            comments: 320,
+            shares: 225,
+            reach: 38000,
+            engagement: 22.3
+          },
+          {
+            id: 'post_003',
+            title: 'Zimbabwe Fashion Week Behind Scenes',
+            type: 'carousel',
+            date: '2023-10-20',
+            likes: 2650,
+            comments: 198,
+            shares: 145,
+            reach: 35000,
+            engagement: 16.8
+          }
+        ],
+        contentTypes: {
+          images: { count: 125, avgEngagement: 14.2, avgReach: 28000 },
+          videos: { count: 68, avgEngagement: 18.5, avgReach: 35000 },
+          carousels: { count: 45, avgEngagement: 16.1, avgReach: 31000 },
+          stories: { count: 180, avgEngagement: 8.9, avgReach: 12000 }
+        },
+        hashtagPerformance: [
+          { hashtag: '#Zimbabwe', usage: 85, avgReach: 42000 },
+          { hashtag: '#VictoriaFalls', usage: 32, avgReach: 48000 },
+          { hashtag: '#ZimFashion', usage: 28, avgReach: 35000 },
+          { hashtag: '#ZimFood', usage: 25, avgReach: 38000 },
+          { hashtag: '#Travel', usage: 45, avgReach: 31000 }
+        ]
+      },
+      milestones: [
+        { achievement: '10K Followers', date: '2023-09-15', metric: 'followers' },
+        { achievement: '1M Total Reach', date: '2023-10-08', metric: 'reach' },
+        { achievement: '$10K Earnings', date: '2023-10-22', metric: 'earnings' },
+        { achievement: '40 Campaigns', date: '2023-11-05', metric: 'campaigns' },
+        { achievement: '15K Followers', date: '2023-11-18', metric: 'followers' }
+      ]
+    },
+    competitiveAnalysis: {
+      marketPosition: {
+        rank: 3,
+        category: 'Travel & Lifestyle Creators',
+        region: 'Zimbabwe',
+        percentile: 92
+      },
+      benchmarks: {
+        avgEngagementRate: 12.8,
+        industryAvgEngagement: 8.5,
+        avgCampaignEarnings: 750,
+        industryCampaignAvg: 520,
+        avgResponseTime: '2.5 hours',
+        industryResponseTime: '6 hours'
+      },
+      opportunities: [
+        'Expand into video content creation (+25% engagement potential)',
+        'Target international tourism brands (+40% earning potential)',
+        'Increase posting frequency during peak hours (+15% reach)',
+        'Develop signature content series (+20% follower retention)'
+      ]
+    }
+  },
+  
   // Preferences
   preferences: {
     theme: 'default',
@@ -644,6 +890,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   const [collaborationHistoryModalVisible, setCollaborationHistoryModalVisible] = useState(false);
   const [workExperienceModalVisible, setWorkExperienceModalVisible] = useState(false);
   const [recommendationsModalVisible, setRecommendationsModalVisible] = useState(false);
+  const [analyticsModalVisible, setAnalyticsModalVisible] = useState(false);
+  const [earningsModalVisible, setEarningsModalVisible] = useState(false);
+  const [performanceModalVisible, setPerformanceModalVisible] = useState(false);
+  const [audienceInsightsModalVisible, setAudienceInsightsModalVisible] = useState(false);
   const [logoutDialogVisible, setLogoutDialogVisible] = useState(false);
   
   // Portfolio States
@@ -655,6 +905,11 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   const [connectionFilter, setConnectionFilter] = useState('all');
   const [selectedConnection, setSelectedConnection] = useState(null);
   const [networkingTab, setNetworkingTab] = useState('connections');
+  
+  // Analytics States
+  const [analyticsTab, setAnalyticsTab] = useState('overview');
+  const [analyticsTimeframe, setAnalyticsTimeframe] = useState('6months');
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
   
   // Edit form state
   const [editForm, setEditForm] = useState({
@@ -682,6 +937,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
     showConnections: true,
     showWorkExperience: true,
     showRecommendations: true,
+    showAnalytics: true,
+    showEarnings: true,
+    showPerformanceMetrics: true,
+    showGrowthTracking: true,
     portfolioLayout: profileData.preferences.portfolio.portfolioLayout,
     itemsPerRow: profileData.preferences.portfolio.itemsPerRow
   });
@@ -860,6 +1119,45 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
       `Duration: ${duration}\nLocation: ${experience.location}\n\n${experience.description}\n\nKey Achievements:\n• ${experience.achievements.join('\n• ')}`,
       [{ text: 'OK' }]
     );
+  }, []);
+
+  // Analytics Handlers
+  const handleAnalyticsTabChange = useCallback((tab: string) => {
+    setAnalyticsTab(tab);
+  }, []);
+
+  const handleTimeframeChange = useCallback((timeframe: string) => {
+    setAnalyticsTimeframe(timeframe);
+  }, []);
+
+  const handleCampaignPress = useCallback((campaign: any) => {
+    setSelectedCampaign(campaign);
+    Alert.alert(
+      campaign.name,
+      `Reach: ${campaign.reach.toLocaleString()}\nEngagement: ${campaign.engagement}%\nROI: ${campaign.roi}x\nRating: ${campaign.rating}/5\n\nImpressions: ${campaign.impressions.toLocaleString()}\nClicks: ${campaign.clicks.toLocaleString()}\nConversions: ${campaign.conversions}`,
+      [{ text: 'View Details', onPress: () => console.log('View campaign details') }, { text: 'OK' }]
+    );
+  }, []);
+
+  const formatCurrency = useCallback((amount: number) => {
+    return new Intl.NumberFormat('en-ZW', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0
+    }).format(amount);
+  }, []);
+
+  const formatPercentage = useCallback((value: number, decimals: number = 1) => {
+    return `${value.toFixed(decimals)}%`;
+  }, []);
+
+  const formatNumber = useCallback((number: number) => {
+    if (number >= 1000000) {
+      return (number / 1000000).toFixed(1) + 'M';
+    } else if (number >= 1000) {
+      return (number / 1000).toFixed(1) + 'K';
+    }
+    return number.toString();
   }, []);
 
   // Enhanced Render Functions
@@ -1324,6 +1622,160 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
     )
   );
 
+  const renderAnalyticsSection = () => (
+    customizations.showAnalytics && (
+      <Card style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+        <Card.Content>
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons name="chart-line" size={24} color={colors.primary} />
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Analytics & Insights</Text>
+            <TouchableOpacity onPress={() => setAnalyticsModalVisible(true)}>
+              <Text style={[styles.viewAllText, { color: colors.primary }]}>View Dashboard</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Analytics Overview */}
+          <View style={styles.analyticsOverview}>
+            <View style={styles.analyticsMetricCard}>
+              <View style={[styles.metricIcon, { backgroundColor: colors.success + '20' }]}>
+                <MaterialCommunityIcons name="currency-usd" size={20} color={colors.success} />
+              </View>
+              <View style={styles.metricContent}>
+                <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
+                  {formatCurrency(profileData.analytics.overview.totalEarnings)}
+                </Text>
+                <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Total Earnings</Text>
+              </View>
+            </View>
+            
+            <View style={styles.analyticsMetricCard}>
+              <View style={[styles.metricIcon, { backgroundColor: colors.info + '20' }]}>
+                <MaterialCommunityIcons name="eye" size={20} color={colors.info} />
+              </View>
+              <View style={styles.metricContent}>
+                <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
+                  {formatNumber(profileData.analytics.overview.totalReach)}
+                </Text>
+                <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Total Reach</Text>
+              </View>
+            </View>
+          </View>
+          
+          <View style={styles.analyticsOverview}>
+            <View style={styles.analyticsMetricCard}>
+              <View style={[styles.metricIcon, { backgroundColor: colors.warning + '20' }]}>
+                <MaterialCommunityIcons name="heart" size={20} color={colors.warning} />
+              </View>
+              <View style={styles.metricContent}>
+                <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
+                  {formatPercentage(profileData.analytics.overview.averageEngagement)}
+                </Text>
+                <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Avg. Engagement</Text>
+              </View>
+            </View>
+            
+            <View style={styles.analyticsMetricCard}>
+              <View style={[styles.metricIcon, { backgroundColor: colors.primary + '20' }]}>
+                <MaterialCommunityIcons name="briefcase" size={20} color={colors.primary} />
+              </View>
+              <View style={styles.metricContent}>
+                <Text style={[styles.metricValue, { color: colors.textPrimary }]}>
+                  {profileData.analytics.overview.campaignsCompleted}
+                </Text>
+                <Text style={[styles.metricLabel, { color: colors.textSecondary }]}>Campaigns</Text>
+              </View>
+            </View>
+          </View>
+          
+          {/* Quick Insights */}
+          <Text style={[styles.analyticsSubtitle, { color: colors.textPrimary }]}>Performance Highlights</Text>
+          <View style={styles.insightsContainer}>
+            <View style={[styles.insightItem, { backgroundColor: colors.success + '10' }]}>
+              <MaterialCommunityIcons name="trending-up" size={16} color={colors.success} />
+              <Text style={[styles.insightText, { color: colors.textPrimary }]}>Top 3 in Zimbabwe Travel Creators</Text>
+            </View>
+            <View style={[styles.insightItem, { backgroundColor: colors.info + '10' }]}>
+              <MaterialCommunityIcons name="chart-line-variant" size={16} color={colors.info} />
+              <Text style={[styles.insightText, { color: colors.textPrimary }]}>+{formatPercentage(profileData.analytics.overview.followerGrowth)} follower growth</Text>
+            </View>
+            <View style={[styles.insightItem, { backgroundColor: colors.primary + '10' }]}>
+              <MaterialCommunityIcons name="star" size={16} color={colors.primary} />
+              <Text style={[styles.insightText, { color: colors.textPrimary }]}>{profileData.analytics.overview.clientSatisfaction}/5 client rating</Text>
+            </View>
+          </View>
+        </Card.Content>
+      </Card>
+    )
+  );
+
+  const renderEarningsSection = () => (
+    customizations.showEarnings && (
+      <Card style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
+        <Card.Content>
+          <View style={styles.sectionHeader}>
+            <MaterialCommunityIcons name="cash-multiple" size={24} color={colors.success} />
+            <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>Earnings Overview</Text>
+            <TouchableOpacity onPress={() => setEarningsModalVisible(true)}>
+              <Text style={[styles.viewAllText, { color: colors.primary }]}>View Report</Text>
+            </TouchableOpacity>
+          </View>
+          
+          {/* Monthly Earnings Chart Placeholder */}
+          <View style={styles.earningsChart}>
+            <Text style={[styles.chartTitle, { color: colors.textPrimary }]}>Monthly Revenue Trend</Text>
+            <View style={styles.chartContainer}>
+              {profileData.analytics.earningsData.monthlyEarnings.slice(-3).map((month, index) => (
+                <View key={month.month} style={styles.chartBar}>
+                  <View 
+                    style={[
+                      styles.barFill, 
+                      { 
+                        height: `${(month.amount / 4000) * 100}%`, 
+                        backgroundColor: colors.success 
+                      }
+                    ]} 
+                  />
+                  <Text style={[styles.barValue, { color: colors.textPrimary }]}>
+                    {formatCurrency(month.amount)}
+                  </Text>
+                  <Text style={[styles.barLabel, { color: colors.textSecondary }]}>
+                    {new Date(month.month).toLocaleDateString('en-US', { month: 'short' })}
+                  </Text>
+                </View>
+              ))}
+            </View>
+          </View>
+          
+          {/* Revenue by Category */}
+          <Text style={[styles.analyticsSubtitle, { color: colors.textPrimary }]}>Revenue by Category</Text>
+          <View style={styles.categoryBreakdown}>
+            {profileData.analytics.earningsData.revenueByCategory.slice(0, 3).map((category, index) => (
+              <View key={category.category} style={styles.categoryItem}>
+                <View style={styles.categoryInfo}>
+                  <Text style={[styles.categoryName, { color: colors.textPrimary }]}>{category.category}</Text>
+                  <Text style={[styles.categoryAmount, { color: colors.success }]}>
+                    {formatCurrency(category.amount)} ({formatPercentage(category.percentage)})
+                  </Text>
+                </View>
+                <View style={styles.categoryBar}>
+                  <View 
+                    style={[
+                      styles.categoryFill,
+                      { 
+                        width: `${category.percentage}%`,
+                        backgroundColor: index === 0 ? colors.primary : index === 1 ? colors.secondary : colors.info
+                      }
+                    ]}
+                  />
+                </View>
+              </View>
+            ))}
+          </View>
+        </Card.Content>
+      </Card>
+    )
+  );
+
   const renderWorkExperienceSection = () => (
     customizations.showWorkExperience && profileData.networking.workExperience.length > 0 && (
       <Card style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
@@ -1433,6 +1885,12 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
         
         {/* Work Experience Section */}
         {renderWorkExperienceSection()}
+        
+        {/* Analytics & Insights Section */}
+        {renderAnalyticsSection()}
+        
+        {/* Earnings Overview Section */}
+        {renderEarningsSection()}
         
         {/* Quick Actions */}
         <Card style={[styles.sectionCard, { backgroundColor: colors.surface }]}>
@@ -1683,6 +2141,30 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
                 <Switch
                   value={customizations.showWorkExperience}
                   onValueChange={(value) => setCustomizations({ ...customizations, showWorkExperience: value })}
+                  color={colors.primary}
+                />
+              )}
+            />
+            
+            <List.Item
+              title="Show Analytics Dashboard"
+              description="Display performance analytics and insights"
+              right={() => (
+                <Switch
+                  value={customizations.showAnalytics}
+                  onValueChange={(value) => setCustomizations({ ...customizations, showAnalytics: value })}
+                  color={colors.primary}
+                />
+              )}
+            />
+            
+            <List.Item
+              title="Show Earnings Overview"
+              description="Display revenue and payment information"
+              right={() => (
+                <Switch
+                  value={customizations.showEarnings}
+                  onValueChange={(value) => setCustomizations({ ...customizations, showEarnings: value })}
                   color={colors.primary}
                 />
               )}
@@ -2446,6 +2928,128 @@ const styles = StyleSheet.create({
   currentBadgeText: {
     fontSize: 10,
     fontWeight: 'bold',
+  },
+  
+  // Analytics Styles
+  analyticsOverview: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  analyticsMetricCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginHorizontal: 4,
+    padding: 12,
+    borderRadius: 12,
+    elevation: 1,
+  },
+  metricIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  metricContent: {
+    flex: 1,
+  },
+  metricValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  metricLabel: {
+    fontSize: 11,
+  },
+  analyticsSubtitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  insightsContainer: {
+    gap: 8,
+  },
+  insightItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10,
+    borderRadius: 8,
+    gap: 8,
+  },
+  insightText: {
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  
+  // Earnings Chart Styles
+  earningsChart: {
+    marginBottom: 16,
+  },
+  chartTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    marginBottom: 12,
+  },
+  chartContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    height: 120,
+    alignItems: 'flex-end',
+    paddingHorizontal: 8,
+  },
+  chartBar: {
+    alignItems: 'center',
+    width: 60,
+  },
+  barFill: {
+    width: 24,
+    minHeight: 20,
+    borderRadius: 12,
+    marginBottom: 4,
+  },
+  barValue: {
+    fontSize: 10,
+    fontWeight: 'bold',
+    marginBottom: 2,
+  },
+  barLabel: {
+    fontSize: 10,
+  },
+  
+  // Category Breakdown Styles
+  categoryBreakdown: {
+    gap: 12,
+  },
+  categoryItem: {
+    paddingVertical: 8,
+  },
+  categoryInfo: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  categoryName: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  categoryAmount: {
+    fontSize: 11,
+    fontWeight: 'bold',
+  },
+  categoryBar: {
+    height: 4,
+    backgroundColor: 'rgba(0,0,0,0.1)',
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  categoryFill: {
+    height: '100%',
+    borderRadius: 2,
   },
   },
 });
