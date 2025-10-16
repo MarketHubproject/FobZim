@@ -7,7 +7,8 @@ import { spacing, radius, shadow } from '../../theme/tokens';
 import { createFadeAnimation, createStaggerAnimation, ANIMATION_DURATION, EASING } from '../../utils/animations';
 import { useEnhancedSearch, useSearchSuggestions } from '../../hooks/useEnhancedSearch';
 import { mockCreators } from '../../data/mockData';
-import { Creator } from '../../data/types';
+import { Creator, Niche } from '../../data/types';
+import { useAppStore } from '../../store/simpleStore';
 import CreatorCard from '../../components/CreatorCard';
 import SectionHeader from '../../components/SectionHeader';
 import AnimatedSuccessMessage from '../../components/AnimatedSuccessMessage';
@@ -22,12 +23,27 @@ interface AnimatedCreatorCardProps {
   onPress: (creator: Creator) => void;
   index: number;
   showSuccessToast: (message: string) => void;
+  compareMode?: boolean;
+  isSelectedForComparison?: boolean;
+  onToggleComparison?: (creatorId: string) => void;
+  showSocialPreviews?: boolean;
+  viewMode?: 'list' | 'grid' | 'discover';
 }
 
-const AnimatedCreatorCard = ({ creator, onPress, index, showSuccessToast }: AnimatedCreatorCardProps) => {
+const AnimatedCreatorCard = ({ 
+  creator, 
+  onPress, 
+  index, 
+  showSuccessToast, 
+  compareMode = false,
+  isSelectedForComparison = false,
+  onToggleComparison,
+  showSocialPreviews = true,
+  viewMode = 'list'
+}: AnimatedCreatorCardProps) => {
   const scaleAnim = useRef(new Animated.Value(0)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
-  const { savedCreatorIds, toggleSaveCreator, followCreator } = useAppStore();
+  const { savedCreatorIds, followedCreatorIds, toggleSaveCreator, toggleFollowCreator } = useAppStore();
   
   const isSaved = savedCreatorIds?.includes(creator.id) || false;
   
@@ -53,18 +69,40 @@ const AnimatedCreatorCard = ({ creator, onPress, index, showSuccessToast }: Anim
   };
   
   const handleFollowCreator = () => {
-    followCreator?.(creator.id);
-    showSuccessToast(`🚀 Following ${creator.name}!`);
+    const isFollowing = followedCreatorIds?.includes(creator.id) || false;
+    toggleFollowCreator?.(creator.id);
+    showSuccessToast(isFollowing ? `👋 Unfollowed ${creator.name}` : `🚀 Following ${creator.name}!`);
   };
+  
+  const isFollowing = followedCreatorIds?.includes(creator.id) || false;
   
   return (
     <Animated.View style={[
       styles.animatedCardContainer,
+      viewMode === 'grid' && styles.gridCardContainer,
       {
         opacity: fadeAnim,
         transform: [{ scale: scaleAnim }]
       }
     ]}>
+      {/* Comparison Mode Overlay */}
+      {compareMode && (
+        <View style={styles.compareOverlay}>
+          <Button
+            mode={isSelectedForComparison ? 'contained' : 'outlined'}
+            onPress={() => onToggleComparison?.(creator.id)}
+            icon={isSelectedForComparison ? 'check' : 'plus'}
+            style={[
+              styles.compareButton,
+              isSelectedForComparison && styles.selectedCompareButton
+            ]}
+            compact
+          >
+            {isSelectedForComparison ? 'Selected' : 'Compare'}
+          </Button>
+        </View>
+      )}
+      
       <SwipeableCard
         leftAction={{
           icon: isSaved ? 'heart-off' : 'heart',
@@ -72,21 +110,61 @@ const AnimatedCreatorCard = ({ creator, onPress, index, showSuccessToast }: Anim
           label: isSaved ? 'Unfavorite' : 'Favorite'
         }}
         rightAction={{
-          icon: 'account-plus',
-          color: colors.primary,
-          label: 'Follow'
+          icon: isFollowing ? 'account-minus' : 'account-plus',
+          color: isFollowing ? colors.accent : colors.primary,
+          label: isFollowing ? 'Unfollow' : 'Follow'
         }}
         onSwipeLeft={handleSaveCreator}
         onSwipeRight={handleFollowCreator}
       >
         <DoubleTapHandler
           onDoubleTap={handleSaveCreator}
-          onSingleTap={() => onPress(creator)}
+          onSingleTap={() => compareMode ? onToggleComparison?.(creator.id) : onPress(creator)}
         >
-          <CreatorCard 
-            creator={creator} 
-            onPress={() => {}} // Handled by DoubleTapHandler
-          />
+          <View>
+            <CreatorCard 
+              creator={creator} 
+              compact={viewMode === 'grid'}
+              onPress={() => {}} // Handled by DoubleTapHandler
+            />
+            
+            {/* Social Media Previews */}
+            {showSocialPreviews && viewMode === 'list' && (
+              <View style={styles.socialPreviewContainer}>
+                <Text variant="bodySmall" style={styles.socialPreviewLabel}>
+                  Recent Activity:
+                </Text>
+                <View style={styles.socialPreviewRow}>
+                  {creator.instagramHandle && (
+                    <View style={styles.socialPreviewItem}>
+                      <MaterialCommunityIcons name="instagram" size={14} color={colors.accent} />
+                      <Text style={styles.socialPreviewText}>2 posts today</Text>
+                    </View>
+                  )}
+                  {creator.tikTokHandle && (
+                    <View style={styles.socialPreviewItem}>
+                      <MaterialCommunityIcons name="music-note" size={14} color={colors.textSecondary} />
+                      <Text style={styles.socialPreviewText}>5 videos this week</Text>
+                    </View>
+                  )}
+                </View>
+              </View>
+            )}
+            
+            {/* Enhanced Stats for Discover Mode */}
+            {viewMode === 'discover' && (
+              <View style={styles.discoverStatsContainer}>
+                <View style={styles.discoverStat}>
+                  <MaterialCommunityIcons name="trending-up" size={16} color={colors.success} />
+                  <Text style={styles.discoverStatText}>Trending</Text>
+                </View>
+                <View style={styles.discoverStat}>
+                  <MaterialCommunityIcons name="heart" size={16} color={colors.accent} />
+                  <Text style={styles.discoverStatText}>{Math.floor(Math.random() * 100)}% match</Text>
+                </View>
+              </View>
+            )}
+          </View>
         </DoubleTapHandler>
       </SwipeableCard>
     </Animated.View>
@@ -101,6 +179,17 @@ export default function CreatorsScreen() {
   const [selectedCreator, setSelectedCreator] = useState<Creator | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  
+  // Enhanced state for new features
+  const [viewMode, setViewMode] = useState<'list' | 'grid' | 'discover'>('list');
+  const [selectedLocation, setSelectedLocation] = useState<string>('');
+  const [selectedFollowerRange, setSelectedFollowerRange] = useState<string>('');
+  const [showSpotlightOnly, setShowSpotlightOnly] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedForComparison, setSelectedForComparison] = useState<string[]>([]);
+  const [showSocialPreviews, setShowSocialPreviews] = useState(true);
   
   // Animation values
   const headerAnim = useRef(new Animated.Value(0)).current;
@@ -154,17 +243,34 @@ export default function CreatorsScreen() {
   // Search suggestions
   const suggestions = useSearchSuggestions(query);
 
-  const availableNiches = [
-    'All', 'Comedy', 'Dance', 'Music', 'Fashion', 'Food', 
-    'Lifestyle', 'Fitness', 'Beauty', 'Tech', 'Education'
+  const availableNiches: (Niche | 'All')[] = [
+    'All', 'Comedy', 'Music', 'Fashion', 'Lifestyle', 'Tech'
   ];
 
   const followerRanges = [
-    { label: 'All Followers', min: 0, max: Infinity },
-    { label: '1K - 10K', min: 1000, max: 10000 },
-    { label: '10K - 50K', min: 10000, max: 50000 },
-    { label: '50K - 100K', min: 50000, max: 100000 },
-    { label: '100K+', min: 100000, max: Infinity },
+    { label: 'All Followers', min: 0, max: Infinity, key: 'all' },
+    { label: '1K - 10K', min: 1000, max: 10000, key: '1k-10k' },
+    { label: '10K - 50K', min: 10000, max: 50000, key: '10k-50k' },
+    { label: '50K - 100K', min: 50000, max: 100000, key: '50k-100k' },
+    { label: '100K+', min: 100000, max: Infinity, key: '100k+' },
+  ];
+  
+  const availableLocations = [
+    'All Locations',
+    'Harare, Zimbabwe',
+    'Bulawayo, Zimbabwe', 
+    'Gweru, Zimbabwe',
+    'Mutare, Zimbabwe',
+    'Other Zimbabwe'
+  ];
+  
+  const sortOptions = [
+    { label: 'Relevance', value: 'relevance', icon: 'sort' },
+    { label: 'Most Followers', value: 'followers', icon: 'account-group' },
+    { label: 'Alphabetical', value: 'alphabetical', icon: 'sort-alphabetical-ascending' },
+    { label: 'Newest First', value: 'newest', icon: 'clock-plus' },
+    { label: 'Trending', value: 'trending', icon: 'trending-up' },
+    { label: 'Most Engaged', value: 'engagement', icon: 'heart-multiple' },
   ];
 
   const onRefresh = async () => {
@@ -200,15 +306,91 @@ export default function CreatorsScreen() {
     showSuccessToast(`🔢 Filtered by ${range.label}`);
   };
 
-  const handleSortChange = (sortBy: 'relevance' | 'followers' | 'alphabetical') => {
+  const handleSortChange = (sortBy: string) => {
     updateFilters({ sortBy });
     setShowSortMenu(false);
-    const sortLabels = {
-      relevance: 'Relevance',
-      followers: 'Followers',
-      alphabetical: 'Name A-Z'
-    };
-    showSuccessToast(`🔄 Sorted by ${sortLabels[sortBy]}`);
+    const sortOption = sortOptions.find(option => option.value === sortBy);
+    showSuccessToast(`🔄 Sorted by ${sortOption?.label}`);
+  };
+  
+  // Enhanced filter handlers
+  const handleLocationFilter = (location: string) => {
+    setSelectedLocation(location);
+    updateFilters({ location: location === 'All Locations' ? undefined : location });
+    showSuccessToast(`📍 ${location === 'All Locations' ? 'Location filter cleared' : `Filtered by ${location}`}`);
+  };
+  
+  const handleFollowerRangeFilter = (range: typeof followerRanges[0]) => {
+    setSelectedFollowerRange(range.key);
+    updateFilters({
+      minFollowers: range.min === 0 ? undefined : range.min,
+      maxFollowers: range.max === Infinity ? undefined : range.max,
+    });
+    showSuccessToast(`📊 Filtered by ${range.label}`);
+  };
+  
+  const toggleSpotlightFilter = () => {
+    const newValue = !showSpotlightOnly;
+    setShowSpotlightOnly(newValue);
+    updateFilters({ spotlight: newValue ? true : undefined });
+    showSuccessToast(`⭐ ${newValue ? 'Showing only spotlight creators' : 'Showing all creators'}`);
+  };
+  
+  // View mode handlers
+  const handleViewModeChange = (mode: 'list' | 'grid' | 'discover') => {
+    setViewMode(mode);
+    showSuccessToast(`📱 Switched to ${mode} view`);
+  };
+  
+  // Comparison feature handlers
+  const toggleCompareMode = () => {
+    const newMode = !compareMode;
+    setCompareMode(newMode);
+    if (!newMode) {
+      setSelectedForComparison([]);
+    }
+    showSuccessToast(`🔀 ${newMode ? 'Compare mode enabled' : 'Compare mode disabled'}`);
+  };
+  
+  const toggleCreatorComparison = (creatorId: string) => {
+    if (selectedForComparison.includes(creatorId)) {
+      setSelectedForComparison(prev => prev.filter(id => id !== creatorId));
+    } else if (selectedForComparison.length < 3) {
+      setSelectedForComparison(prev => [...prev, creatorId]);
+    } else {
+      showSuccessToast('⚠️ Maximum 3 creators can be compared');
+    }
+  };
+  
+  const showComparison = () => {
+    if (selectedForComparison.length >= 2) {
+      showSuccessToast(`📊 Comparing ${selectedForComparison.length} creators`);
+      // Navigate to comparison screen
+    } else {
+      showSuccessToast('⚠️ Select at least 2 creators to compare');
+    }
+  };
+  
+  // Load more content for infinite scroll
+  const loadMoreCreators = () => {
+    if (loadingMore) return;
+    
+    setLoadingMore(true);
+    setTimeout(() => {
+      setCurrentPage(prev => prev + 1);
+      setLoadingMore(false);
+      showSuccessToast('🔄 More creators loaded!');
+    }, 1000);
+  };
+  
+  // Clear all filters
+  const clearAllFilters = () => {
+    clearSearch();
+    setSelectedLocation('');
+    setSelectedFollowerRange('');
+    setShowSpotlightOnly(false);
+    setCurrentPage(1);
+    showSuccessToast('🧹 All filters cleared!');
   };
 
   const renderCreator = ({ item, index }: { item: Creator; index: number }) => (
@@ -217,6 +399,11 @@ export default function CreatorsScreen() {
       onPress={setSelectedCreator}
       index={index}
       showSuccessToast={showSuccessToast}
+      compareMode={compareMode}
+      isSelectedForComparison={selectedForComparison.includes(item.id)}
+      onToggleComparison={toggleCreatorComparison}
+      showSocialPreviews={showSocialPreviews}
+      viewMode={viewMode}
     />
   );
 
@@ -338,7 +525,7 @@ export default function CreatorsScreen() {
         )}
       </Animated.View>
 
-      {/* Animated Filter Controls */}
+      {/* Enhanced Filter Controls */}
       <Animated.View style={[
         styles.filtersContainer,
         {
@@ -351,7 +538,29 @@ export default function CreatorsScreen() {
           }]
         }
       ]}>
-        {/* Niche Filter - ScrollView Solution */}
+        {/* View Mode Toggle */}
+        <View style={styles.viewModeContainer}>
+          <Text style={styles.filterSectionTitle}>View Mode:</Text>
+          <View style={styles.viewModeButtons}>
+            {[{mode: 'list', icon: 'view-list'}, {mode: 'grid', icon: 'view-grid'}, {mode: 'discover', icon: 'compass'}].map(({mode, icon}) => (
+              <Button
+                key={mode}
+                mode={viewMode === mode ? 'contained' : 'outlined'}
+                onPress={() => handleViewModeChange(mode as 'list' | 'grid' | 'discover')}
+                icon={icon}
+                style={[
+                  styles.viewModeButton,
+                  viewMode === mode && styles.selectedViewModeButton
+                ]}
+                compact
+              >
+                {mode.charAt(0).toUpperCase() + mode.slice(1)}
+              </Button>
+            ))}
+          </View>
+        </View>
+        
+        {/* Niche Filter */}
         <View style={styles.chipContainer}>
           <Text style={styles.filterSectionTitle}>Filter by Category:</Text>
           <View style={styles.chipsWrapper}>
@@ -374,8 +583,85 @@ export default function CreatorsScreen() {
             ))}
           </View>
         </View>
+        
+        {/* Location Filter */}
+        <View style={styles.chipContainer}>
+          <Text style={styles.filterSectionTitle}>Filter by Location:</Text>
+          <View style={styles.chipsWrapper}>
+            {availableLocations.map((location) => (
+              <Chip
+                key={location}
+                selected={selectedLocation === location || (location === 'All Locations' && !selectedLocation)}
+                onPress={() => handleLocationFilter(location)}
+                style={[
+                  styles.filterChip,
+                  (selectedLocation === location || (location === 'All Locations' && !selectedLocation)) && styles.selectedChip
+                ]}
+                textStyle={[
+                  styles.chipText,
+                  (selectedLocation === location || (location === 'All Locations' && !selectedLocation)) && styles.selectedChipText
+                ]}
+              >
+                {location.replace(', Zimbabwe', '')}
+              </Chip>
+            ))}
+          </View>
+        </View>
+        
+        {/* Follower Range Filter */}
+        <View style={styles.chipContainer}>
+          <Text style={styles.filterSectionTitle}>Filter by Followers:</Text>
+          <View style={styles.chipsWrapper}>
+            {followerRanges.map((range) => (
+              <Chip
+                key={range.key}
+                selected={selectedFollowerRange === range.key}
+                onPress={() => handleFollowerRangeFilter(range)}
+                style={[
+                  styles.filterChip,
+                  selectedFollowerRange === range.key && styles.selectedChip
+                ]}
+                textStyle={[
+                  styles.chipText,
+                  selectedFollowerRange === range.key && styles.selectedChipText
+                ]}
+              >
+                {range.label}
+              </Chip>
+            ))}
+          </View>
+        </View>
+        
+        {/* Special Filters */}
+        <View style={styles.specialFiltersContainer}>
+          <Button
+            mode={showSpotlightOnly ? 'contained' : 'outlined'}
+            onPress={toggleSpotlightFilter}
+            icon="star"
+            style={[
+              styles.specialFilterButton,
+              showSpotlightOnly && styles.selectedSpecialFilter
+            ]}
+            compact
+          >
+            Spotlight Only
+          </Button>
+          
+          <Button
+            mode={showSocialPreviews ? 'contained' : 'outlined'}
+            onPress={() => setShowSocialPreviews(!showSocialPreviews)}
+            icon="instagram"
+            style={[
+              styles.specialFilterButton,
+              showSocialPreviews && styles.selectedSpecialFilter
+            ]}
+            compact
+          >
+            Social Previews
+          </Button>
+        </View>
 
-        {/* Sort and Filter Actions */}
+        {/* Enhanced Actions Container */}
         <View style={styles.actionsContainer}>
           <Menu
             visible={showSortMenu}
@@ -392,23 +678,71 @@ export default function CreatorsScreen() {
               </Button>
             }
           >
-            <Menu.Item onPress={() => handleSortChange('relevance')} title="Relevance" />
-            <Menu.Item onPress={() => handleSortChange('followers')} title="Followers" />
-            <Menu.Item onPress={() => handleSortChange('alphabetical')} title="Name A-Z" />
+            {sortOptions.map((option) => (
+              <Menu.Item 
+                key={option.value}
+                onPress={() => handleSortChange(option.value)} 
+                title={option.label}
+                leadingIcon={option.icon}
+              />
+            ))}
           </Menu>
+          
+          <Button
+            mode={compareMode ? 'contained' : 'outlined'}
+            onPress={toggleCompareMode}
+            icon="compare"
+            style={[
+              styles.actionButton,
+              compareMode && styles.selectedActionButton
+            ]}
+            compact
+          >
+            Compare
+          </Button>
 
-          {hasFilters && (
+          {(hasFilters || selectedLocation || selectedFollowerRange || showSpotlightOnly) && (
             <Button
               mode="text"
-              onPress={clearSearch}
+              onPress={clearAllFilters}
               icon="filter-off"
               style={styles.actionButton}
               compact
             >
-              Clear
+              Clear All
             </Button>
           )}
         </View>
+        
+        {/* Comparison Controls */}
+        {compareMode && selectedForComparison.length > 0 && (
+          <View style={styles.comparisonControls}>
+            <Text style={styles.comparisonText}>
+              {selectedForComparison.length} creator{selectedForComparison.length > 1 ? 's' : ''} selected
+            </Text>
+            <View style={styles.comparisonActions}>
+              <Button
+                mode="contained"
+                onPress={showComparison}
+                icon="chart-line"
+                disabled={selectedForComparison.length < 2}
+                style={styles.compareNowButton}
+                compact
+              >
+                Compare Now
+              </Button>
+              <Button
+                mode="outlined"
+                onPress={() => setSelectedForComparison([])}
+                icon="close"
+                style={styles.clearComparisonButton}
+                compact
+              >
+                Clear
+              </Button>
+            </View>
+          </View>
+        )}
       </Animated.View>
 
       {/* Results Header */}
@@ -428,6 +762,8 @@ export default function CreatorsScreen() {
           renderItem={renderCreator}
           keyExtractor={(item) => item.id}
           showsVerticalScrollIndicator={false}
+          numColumns={viewMode === 'grid' ? 2 : 1}
+          key={viewMode} // Force re-render when view mode changes
           refreshControl={
             <RefreshControl 
               refreshing={refreshing} 
@@ -438,20 +774,39 @@ export default function CreatorsScreen() {
           }
           contentContainerStyle={[
             styles.creatorsList,
+            viewMode === 'grid' && styles.gridList,
             creators.length === 0 && styles.emptyList
           ]}
+          columnWrapperStyle={viewMode === 'grid' ? styles.gridRow : undefined}
+          onEndReached={loadMoreCreators}
+          onEndReachedThreshold={0.1}
+          ListFooterComponent={
+            loadingMore ? (
+              <View style={styles.loadingMore}>
+                <MaterialCommunityIcons
+                  name="loading"
+                  size={24}
+                  color={colors.primary}
+                />
+                <Text style={styles.loadingMoreText}>Loading more creators...</Text>
+              </View>
+            ) : null
+          }
           ListEmptyComponent={
             <View style={styles.emptyState}>
               <MaterialCommunityIcons
-                name="account-search"
+                name={viewMode === 'discover' ? 'compass-off' : 'account-search'}
                 size={64}
                 color={colors.textSecondary}
               />
               <Text variant="titleMedium" style={styles.emptyTitle}>
-                No creators found
+                {viewMode === 'discover' ? 'No recommendations found' : 'No creators found'}
               </Text>
               <Text variant="bodyMedium" style={styles.emptySubtitle}>
-                Try adjusting your search or filters
+                {viewMode === 'discover' 
+                  ? 'Try adjusting your interests or follow more creators' 
+                  : 'Try adjusting your search or filters'
+                }
               </Text>
             </View>
           }
@@ -491,6 +846,10 @@ const styles = StyleSheet.create({
   },
   animatedCardContainer: {
     marginVertical: spacing.xs,
+  },
+  gridCardContainer: {
+    flex: 1,
+    marginHorizontal: spacing.xs,
   },
   header: {
     padding: spacing.lg,
@@ -636,5 +995,144 @@ const styles = StyleSheet.create({
     bottom: spacing.lg,
     right: spacing.md,
     backgroundColor: colors.primary,
+  },
+  
+  // Enhanced styles for new features
+  viewModeContainer: {
+    marginBottom: spacing.md,
+  },
+  viewModeButtons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  viewModeButton: {
+    flex: 1,
+    borderColor: colors.border,
+  },
+  selectedViewModeButton: {
+    backgroundColor: colors.primary,
+  },
+  
+  specialFiltersContainer: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  specialFilterButton: {
+    flex: 1,
+    borderColor: colors.border,
+  },
+  selectedSpecialFilter: {
+    backgroundColor: colors.primary,
+  },
+  
+  selectedActionButton: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  
+  comparisonControls: {
+    backgroundColor: colors.surface,
+    padding: spacing.md,
+    borderRadius: radius.md,
+    marginTop: spacing.md,
+    ...shadow.sm,
+  },
+  comparisonText: {
+    color: colors.textPrimary,
+    fontWeight: '600',
+    marginBottom: spacing.sm,
+    textAlign: 'center',
+  },
+  comparisonActions: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  compareNowButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+  },
+  clearComparisonButton: {
+    flex: 1,
+    borderColor: colors.accent,
+  },
+  
+  // Grid layout styles
+  gridList: {
+    paddingHorizontal: spacing.sm,
+  },
+  gridRow: {
+    justifyContent: 'space-between',
+  },
+  
+  // Loading and empty states
+  loadingMore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: spacing.lg,
+    gap: spacing.sm,
+  },
+  loadingMoreText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+  },
+  
+  // Creator card enhancements
+  compareOverlay: {
+    position: 'absolute',
+    top: spacing.sm,
+    right: spacing.sm,
+    zIndex: 10,
+  },
+  compareButton: {
+    borderColor: colors.primary,
+  },
+  selectedCompareButton: {
+    backgroundColor: colors.primary,
+  },
+  
+  socialPreviewContainer: {
+    padding: spacing.sm,
+    backgroundColor: colors.background,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  socialPreviewLabel: {
+    color: colors.textSecondary,
+    marginBottom: spacing.xs,
+    fontSize: 12,
+  },
+  socialPreviewRow: {
+    flexDirection: 'row',
+    gap: spacing.md,
+  },
+  socialPreviewItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  socialPreviewText: {
+    color: colors.textSecondary,
+    fontSize: 11,
+  },
+  
+  discoverStatsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: spacing.sm,
+    backgroundColor: colors.background,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  discoverStat: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+  },
+  discoverStatText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
