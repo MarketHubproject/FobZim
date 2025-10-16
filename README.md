@@ -217,9 +217,9 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact & Support
 
-- **Project Lead**: [Your Name]
-- **Email**: [your.email@example.com]
-- **GitHub**: [github.com/yourusername/FobZim]
+- **Project Lead**: [Pardon Magwaza]
+- **Email**: [pdinc95@gmail.com]
+- **GitHub**: [github.com/Pardon Magwaza/FobZim]
 
 ---
 
